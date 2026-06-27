@@ -1,0 +1,232 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: #111827;
+  color: white;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.glass-card {
+  background: rgba(31, 41, 55, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(55, 65, 81, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.input-modern {
+  display: block;
+  width: 100%;
+  background: rgba(31, 41, 55, 0.8);
+  border: 1px solid #374151;
+  color: #f3f4f6;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s;
+  outline: none;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+.input-modern:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+.input-modern::placeholder {
+  color: #9ca3af;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #3b82f6, #4f46e5);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-primary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-secondary {
+  background: #374151;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+.btn-secondary:hover {
+  background: #4b5563;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+/* ---- LiveKit overrides ---- */
+.lk-room-container {
+  height: 100% !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.lk-participant-placeholder {
+  display: none !important;
+}
+.lk-video-conference {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.lk-participant-grid {
+  flex: 1 !important;
+  height: 100% !important;
+  min-height: 200px !important;
+}
+.lk-participant-tile {
+  height: 100% !important;
+  min-height: 200px !important;
+  background: #1f2937 !important;
+}
+.lk-participant-placeholder {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.lk-participant-tile video {
+  z-index: 10 !important;
+  position: relative !important;
+}
+.lk-participant-tile {
+  background: #1f2937 !important;
+}
+
+/* ---- LiveKit Control Bar – Rectangular Buttons with Text ---- */
+.lk-control-bar {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  border-radius: 16px !important;
+  margin: 16px !important;
+  padding: 12px 16px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 12px !important; /* Spacing between the buttons */
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Base style for all rectangular buttons */
+.lk-control-bar .lk-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important; /* Space between icon and text */
+  font-size: 15px !important; /* Show text */
+  font-weight: 500 !important;
+  color: #e5e7eb !important;
+  width: auto !important; /* Allow width to fit content */
+  height: 44px !important;
+  padding: 0 20px !important;
+  border-radius: 12px !important; /* Rectangular with rounded corners */
+  background: rgba(255, 255, 255, 0.08) !important;
+  transition: all 0.2s ease !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  border: none !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+}
+
+.lk-control-bar .lk-button:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px) !important;
+}
+
+.lk-control-bar .lk-button:active {
+  transform: translateY(0) !important;
+}
+
+/* Active State (e.g. mic unmuted, camera on) */
+.lk-control-bar .lk-button[aria-pressed="true"] {
+  background: #3b82f6 !important;
+  color: white !important;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Allow text to render normally */
+.lk-control-bar .lk-button-label,
+.lk-control-bar .lk-button > span {
+  display: block !important;
+}
+
+/* Bypass LiveKit's internal wrappers (e.g. .lk-button-icon) so SVG and text sit side by side */
+.lk-control-bar .lk-button > div:not(.lk-button-label) {
+  display: contents !important;
+}
+
+/* Style the SVG icons */
+.lk-control-bar .lk-button svg {
+  width: 20px !important;
+  height: 20px !important;
+  display: block !important;
+  color: currentColor !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: static !important;
+  transform: none !important;
+}
+
+/* ---- Leave Button Specifics ---- */
+.lk-control-bar .lk-disconnect-button {
+  background: #ef4444 !important;
+  color: white !important;
+  border-radius: 12px !important;
+}
+
+.lk-control-bar .lk-disconnect-button:hover {
+  background: #dc2626 !important;
+}
+
+/* ---- Hide unwanted elements ---- */
+.lk-control-bar [data-lk-source="chat"] {
+  display: none !important;
+}
+
+.lk-control-bar .lk-button-group {
+  display: flex !important;
+  gap: 0 !important;
+}
+
+/* Hide device selection dropdowns */
+.lk-control-bar .lk-button-group-menu,
+.lk-control-bar .lk-button-group > .lk-button:not(:first-child) {
+  display: none !important;
+}
+
+/* ---- Animations for modals ---- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
