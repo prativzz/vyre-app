@@ -151,6 +151,7 @@ export default function VoiceVideoChannel({ channel, serverId, token, onLeave })
 
   useEffect(() => {
     fetchToken();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel, serverId, token]);
 
   const handleDisconnected = () => {

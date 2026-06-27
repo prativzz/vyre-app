@@ -10,6 +10,7 @@ export default function DirectMessages({ friend, token, socket, user }) {
 
   useEffect(() => {
     fetchMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [friend.friend_id]);
 
   useEffect(() => {

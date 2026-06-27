@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [activeVoiceChannel, setActiveVoiceChannel] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [directCallTarget, setDirectCallTarget] = useState(null);
   const [members, setMembers] = useState([]);
   const [friends, setFriends] = useState([]);
