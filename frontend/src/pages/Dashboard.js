@@ -9,8 +9,7 @@ import VoiceVideoChannel from '../components/VoiceVideoChannel';
 import DirectMessages from '../components/DirectMessages';
 import ProfileModal from '../components/ProfileModal';
 import CreateServerModal from '../components/CreateServerModal';
-import { MessageSquare } from 'lucide-react';
-
+import { MessageSquare, Menu, Users, X } from 'lucide-react';
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
   const { socket } = useSocket(token);
@@ -30,6 +29,10 @@ export default function Dashboard() {
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [selectedFriend, setSelectedFriend] = useState(null);
+  
+  // Mobile responsiveness state
+  const [showLeftSidebar, setShowLeftSidebar] = useState(false);
+  const [showRightSidebar, setShowRightSidebar] = useState(false);
 
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef(null);
@@ -272,8 +275,37 @@ export default function Dashboard() {
   const friendsOnline = friends.filter(f => f.online).length;
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-900 to-black overflow-hidden">
-      <ServerSidebar
+    <div className="flex h-screen bg-gradient-to-br from-gray-900 to-black overflow-hidden relative">
+      
+      {/* Mobile Header (visible only on small screens) */}
+      <div className="lg:hidden flex items-center justify-between p-3 bg-gray-900 border-b border-gray-800 absolute top-0 w-full z-30">
+        <button 
+          onClick={() => setShowLeftSidebar(!showLeftSidebar)}
+          className="p-2 text-gray-300 hover:text-white bg-gray-800 rounded-lg"
+        >
+          {showLeftSidebar ? <X size={20} /> : <Menu size={20} />}
+        </button>
+        <div className="font-bold text-lg bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+          {selectedServer ? selectedServer.name : (selectedFriend ? 'Direct Message' : 'Vyre')}
+        </div>
+        <button 
+          onClick={() => setShowRightSidebar(!showRightSidebar)}
+          className="p-2 text-gray-300 hover:text-white bg-gray-800 rounded-lg"
+        >
+          {showRightSidebar ? <X size={20} /> : <Users size={20} />}
+        </button>
+      </div>
+
+      {/* Main Container for all content */}
+      <div className="flex flex-1 w-full h-full pt-[60px] lg:pt-0">
+        
+        {/* Left Sidebars Wrapper */}
+        <div className={`
+          absolute lg:relative z-40 h-full flex transform transition-transform duration-300 ease-in-out
+          ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
+          <ServerSidebar
+
         servers={servers}
         onSelectServer={setSelectedServer}
         onCreateServer={handleCreateServer}
@@ -305,10 +337,20 @@ export default function Dashboard() {
             refreshAll();
             setSelectedServer(null);
           }}
-        />
-      )}
+          />
+        )}
+        </div>
 
-      <div className="flex-1 flex flex-col bg-gray-800/40 backdrop-blur-sm rounded-2xl shadow-2xl">
+        {/* Overlay for mobile when sidebar is open */}
+        {showLeftSidebar && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+            onClick={() => setShowLeftSidebar(false)}
+          />
+        )}
+        
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col bg-gray-800/40 backdrop-blur-sm rounded-2xl shadow-2xl w-full">
         {!selectedServer && !selectedFriend ? (
           // Home page when no server and no friend selected
           <div className="flex flex-1 items-center justify-center px-4">
@@ -351,9 +393,21 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Right Overlay */}
+      {showRightSidebar && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setShowRightSidebar(false)}
+        />
+      )}
+
       {/* Right sidebar */}
-      <div className="w-72 bg-gray-900/40 backdrop-blur-sm border-l border-gray-800 p-4 flex flex-col overflow-y-auto">
+      <div className={`
+        absolute lg:relative right-0 z-40 h-full w-72 bg-gray-900/40 backdrop-blur-sm border-l border-gray-800 p-4 flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out
+        ${showRightSidebar ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+      `}>
         {!selectedServer ? (
+
           // ----- HOME PAGE: Friends + Pending Requests -----
           <>
             <div className="mb-2">
@@ -504,6 +558,7 @@ export default function Dashboard() {
           onCreate={handleCreateServer}
         />
       )}
+      </div>
     </div>
   );
 }

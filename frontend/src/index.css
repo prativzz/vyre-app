@@ -230,3 +230,33 @@ body {
 .animate-scale-in {
   animation: scaleIn 0.2s ease-out;
 }
+
+/* ---- Mobile Responsiveness & Landscape Optimizations ---- */
+@media (max-width: 1024px) {
+  /* On mobile, make sure the LiveKit controls are a bit more compact if needed */
+  .lk-control-bar {
+    padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+  .lk-control-bar .lk-button {
+    padding: 0 12px !important;
+    font-size: 14px !important;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Reduce padding/margins to maximize vertical screen real estate for video and chat when phone is held sideways */
+  .lk-control-bar {
+    padding: 6px 12px !important;
+    margin: 8px !important;
+    bottom: 8px !important;
+  }
+  .lk-control-bar .lk-button {
+    height: 36px !important;
+    font-size: 13px !important;
+  }
+  /* Optional: Make the chat/video area tighter vertically */
+  .lk-video-conference {
+    height: calc(100% - 10px) !important;
+  }
+}
