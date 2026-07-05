@@ -41,47 +41,6 @@ export default function ProfileModal({ user, token, onClose, onUpdate }) {
       }),
     });
     const data = await res.json();
-import Modal from './Modals/Modal';
-
-export default function ProfileModal({ user, token, onClose, onUpdate }) {
-  const [displayName, setDisplayName] = useState(user.display_name || user.username);
-  const [status, setStatus] = useState(user.status || '');
-  const [avatarPreview, setAvatarPreview] = useState(user.avatar || '');
-  const [avatarFile, setAvatarFile] = useState(null);
-  const fileInputRef = useRef();
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setAvatarFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setAvatarPreview(reader.result);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRemoveAvatar = () => {
-    setAvatarFile(null);
-    setAvatarPreview('');
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    let avatarBase64 = avatarPreview;
-    if (avatarFile) {
-      // Convert to base64 (already done in preview)
-      avatarBase64 = avatarPreview;
-    }
-    const res = await fetch(`${API_URL}/user/profile`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        display_name: displayName,
-        status: status,
-        avatar: avatarBase64,
-      }),
-    });
-    const data = await res.json();
     if (data.success) {
       onUpdate(data.user);
       onClose();
@@ -127,7 +86,7 @@ export default function ProfileModal({ user, token, onClose, onUpdate }) {
             <label className="block text-sm font-medium text-gray-300 mb-1">Display Name</label>
             <input
               type="text"
-              className="input-modern"
+              className="input-modern w-full"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
             />
@@ -136,7 +95,7 @@ export default function ProfileModal({ user, token, onClose, onUpdate }) {
             <label className="block text-sm font-medium text-gray-300 mb-1">Status</label>
             <input
               type="text"
-              className="input-modern"
+              className="input-modern w-full"
               placeholder="e.g., Gaming, Studying, AFK"
               value={status}
               onChange={(e) => setStatus(e.target.value)}

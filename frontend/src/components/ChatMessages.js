@@ -54,58 +54,6 @@ export default function ChatMessages({ channelId, token, socket, user }) {
     setReplyTo(null);
   };
 
-import { motion, AnimatePresence } from 'framer-motion';
-
-export default function ChatMessages({ channelId, token, socket, user }) {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [replyTo, setReplyTo] = useState(null);
-  const bottomRef = useRef();
-
-  // Fetch initial messages
-  useEffect(() => {
-    fetch(`${API_URL}/channels/${channelId}/messages`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => {
-        setMessages(data);
-      })
-      .catch(err => console.error('Error loading messages:', err));
-  }, [channelId, token]);
-
-  // --- Socket listeners ---
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleNewMessage = ({ channelId: chanId, message }) => {
-      if (chanId === channelId) {
-        setMessages(prev => [...prev, message]);
-      }
-    };
-
-    socket.on('message:new', handleNewMessage);
-
-    return () => {
-      socket.off('message:new', handleNewMessage);
-    };
-  }, [socket, channelId]);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const sendMessage = (e) => {
-    if (e) e.preventDefault();
-    if (!input.trim()) return;
-    socket.emit('message:send', {
-      channelId,
-      content: input,
-      replyTo: replyTo?.id || null
-    });
-    setInput('');
-    setReplyTo(null);
-  };
 
   const isOwnMessage = (msg) => msg.userId === user?.id;
   const getInitial = (name) => name ? name.charAt(0).toUpperCase() : '?';

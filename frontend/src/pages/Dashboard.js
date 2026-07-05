@@ -12,7 +12,7 @@ import CreateServerModal from '../components/CreateServerModal';
 import { MessageSquare, Menu, Users, X } from 'lucide-react';
 import SpatialBackground from '../components/layout/SpatialBackground';
 import GlassPanel from '../components/ui/GlassPanel';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { useCursorGlow } from '../hooks/useCursorGlow';
 
 export default function Dashboard() {
