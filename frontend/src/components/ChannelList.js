@@ -1,6 +1,7 @@
 import { API_URL } from '../config';
 import { useState } from 'react';
 import CreateChannelModal from './CreateChannelModal';
+import GlassPanel from './ui/GlassPanel';
 
 export default function ChannelList({
   channels,
@@ -204,7 +205,7 @@ export default function ChannelList({
   const voiceChannels = channels.filter(c => c.type === 'voice');
 
   return (
-    <div className="w-64 bg-gray-900/50 backdrop-blur-sm border-r border-gray-800 p-3 flex flex-col h-full">
+    <GlassPanel blur="xl" className="w-64 my-4 ml-4 mr-2 flex-shrink-0 p-3 flex flex-col h-[calc(100%-2rem)]">
       <div className="flex items-center justify-between mb-4 px-2 flex-shrink-0">
         <span className="text-sm font-bold text-white truncate mr-2">{serverName || 'Server'}</span>
         <div className="flex items-center space-x-2">
@@ -293,6 +294,6 @@ export default function ChannelList({
           </div>
         </div>
       )}
-    </div>
+    </GlassPanel>
   );
 }

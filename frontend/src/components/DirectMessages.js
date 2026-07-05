@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { API_URL } from '../config';
 import { Send, Reply, X, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DirectMessages({ friend, token, socket, user }) {
   const [messages, setMessages] = useState([]);
@@ -87,10 +88,18 @@ export default function DirectMessages({ friend, token, socket, user }) {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth">
+        <AnimatePresence initial={false}>
         {messages.map((m) => {
           const isMine = m.sender_id === user.id;
           return (
-            <div key={m.id} id={`msg-${m.id}`} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} group`}>
+            <motion.div 
+              key={m.id} 
+              id={`msg-${m.id}`} 
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} group w-full`}
+            >
               
               {/* Reply Preview */}
               {m.reply_to && m.reply_content && (
@@ -106,46 +115,56 @@ export default function DirectMessages({ friend, token, socket, user }) {
 
               <div className={`flex items-end space-x-2 max-w-[70%] ${isMine ? 'flex-row-reverse space-x-reverse' : 'flex-row'}`}>
                 {/* Avatar */}
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold text-gray-300 shadow-sm">
+                <motion.div 
+                  whileHover={{ scale: 1.1 }}
+                  className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-sm font-bold text-gray-300 shadow-md border border-gray-700 overflow-hidden"
+                >
                   {getInitial(m.display_name || m.username)}
-                </div>
+                </motion.div>
                 
                 {/* Message Bubble */}
-                <div className={`relative px-4 py-2 rounded-2xl shadow-md text-[15px] leading-relaxed break-words
+                <motion.div 
+                  whileHover={{ y: -2 }}
+                  className={`relative px-4 py-2 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.1)] text-[15px] leading-relaxed break-words transition-colors
                   ${isMine 
-                    ? 'bg-blue-600 text-white rounded-br-sm' 
-                    : 'bg-gray-700 text-gray-100 rounded-bl-sm'
+                    ? 'bg-blue-600/90 text-white rounded-br-sm border border-blue-500/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] hover:bg-blue-600' 
+                    : 'bg-white/5 text-gray-100 rounded-bl-sm border border-white/10 backdrop-blur-md hover:bg-white/10'
                   }`}
                 >
                   {m.content}
-                </div>
+                </motion.div>
                 
                 {/* Hover Actions */}
                 <div className={`flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isMine ? 'mr-2' : 'ml-2'}`}>
-                  <button 
+                  <motion.button 
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setReplyTo(m)}
-                    className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-gray-800 rounded-full transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/80 rounded-full transition-colors backdrop-blur-sm"
                     title="Reply"
                   >
                     <Reply size={14} className="-scale-x-100" />
-                  </button>
+                  </motion.button>
                   {isMine && (
-                    <button 
+                    <motion.button 
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => deleteMessage(m.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-full transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-red-400 bg-gray-800/50 hover:bg-gray-700/80 rounded-full transition-colors backdrop-blur-sm"
                       title="Delete"
                     >
                       <Trash2 size={14} />
-                    </button>
+                    </motion.button>
                   )}
                 </div>
               </div>
               <span className={`text-[11px] text-gray-500 mt-1 ${isMine ? 'mr-12' : 'ml-12'}`}>
                 {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(m.createdAt))}
               </span>
-            </div>
+            </motion.div>
           );
         })}
+        </AnimatePresence>
         {messages.length === 0 && (
           <div className="h-full flex items-center justify-center text-gray-500 italic">
             Say hi to {friend.display_name || friend.username}!
@@ -155,9 +174,14 @@ export default function DirectMessages({ friend, token, socket, user }) {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-gray-900/80 backdrop-blur-sm border-t border-gray-800">
+      <div className="p-4 bg-transparent border-t border-white/5 relative z-10 before:absolute before:inset-0 before:bg-gradient-to-t before:from-gray-900/90 before:to-transparent before:backdrop-blur-md before:-z-10">
         {replyTo && (
-          <div className="flex items-center justify-between bg-gray-800/80 px-4 py-2 rounded-t-xl border-l-4 border-blue-500 shadow-sm mb-[-8px] pb-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="flex items-center justify-between bg-white/10 backdrop-blur-lg px-4 py-2 rounded-t-2xl border-l-4 border-blue-500 shadow-sm mb-[-12px] pb-5 z-0 relative"
+          >
             <div className="flex items-center text-sm text-gray-300">
               <Reply size={14} className="mr-2 text-blue-400 -scale-x-100" />
               Replying to <span className="font-semibold text-white ml-1 mr-2">{replyTo.username}</span>
@@ -165,24 +189,26 @@ export default function DirectMessages({ friend, token, socket, user }) {
             <button onClick={() => setReplyTo(null)} className="text-gray-400 hover:text-white transition-colors">
               <X size={16} />
             </button>
-          </div>
+          </motion.div>
         )}
-        <form onSubmit={sendMessage} className="relative z-10">
-          <div className="flex items-center bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-inner focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/50 transition-all">
+        <form onSubmit={sendMessage} className="relative z-10 mt-1">
+          <div className="flex items-center bg-white/5 backdrop-blur-xl rounded-full overflow-hidden border border-white/10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] focus-within:border-blue-500/50 focus-within:bg-white/10 transition-all duration-300">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={`Message @${friend.username}`}
-              className="flex-1 bg-transparent text-gray-100 px-4 py-3 focus:outline-none"
+              className="flex-1 bg-transparent text-gray-100 px-6 py-3 focus:outline-none placeholder:text-gray-500"
             />
-            <button
+            <motion.button
+              whileHover={input.trim() ? { scale: 1.05 } : {}}
+              whileTap={input.trim() ? { scale: 0.95 } : {}}
               type="submit"
               disabled={!input.trim()}
-              className="px-4 py-2 mr-1 text-blue-500 hover:text-blue-400 hover:bg-gray-700 rounded-lg disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+              className="px-4 py-2 mr-2 text-white bg-blue-600 rounded-full disabled:opacity-50 disabled:bg-gray-700 transition-colors shadow-[0_2px_10px_rgba(37,99,235,0.3)]"
             >
-              <Send size={20} />
-            </button>
+              <Send size={18} className={input.trim() ? "translate-x-0.5 -translate-y-0.5" : ""} />
+            </motion.button>
           </div>
         </form>
       </div>

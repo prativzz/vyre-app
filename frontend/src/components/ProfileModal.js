@@ -1,5 +1,47 @@
 import { API_URL } from '../config';
 import { useState, useRef } from 'react';
+import Modal from './Modals/Modal';
+
+export default function ProfileModal({ user, token, onClose, onUpdate }) {
+  const [displayName, setDisplayName] = useState(user.display_name || user.username);
+  const [status, setStatus] = useState(user.status || '');
+  const [avatarPreview, setAvatarPreview] = useState(user.avatar || '');
+  const [avatarFile, setAvatarFile] = useState(null);
+  const fileInputRef = useRef();
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setAvatarPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    let avatarBase64 = avatarPreview;
+    if (avatarFile) {
+      // Convert to base64 (already done in preview)
+      avatarBase64 = avatarPreview;
+    }
+    const res = await fetch(`${API_URL}/user/profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        display_name: displayName,
+        status: status,
+        avatar: avatarBase64,
+      }),
+    });
+    const data = await res.json();
+import Modal from './Modals/Modal';
 
 export default function ProfileModal({ user, token, onClose, onUpdate }) {
   const [displayName, setDisplayName] = useState(user.display_name || user.username);
@@ -47,9 +89,8 @@ export default function ProfileModal({ user, token, onClose, onUpdate }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="glass-card rounded-2xl p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
+    <Modal isOpen={true} onClose={onClose}>
+      <h2 className="text-2xl font-bold mb-4 text-white">Edit Profile</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex flex-col items-center">
             <div
@@ -102,11 +143,10 @@ export default function ProfileModal({ user, token, onClose, onUpdate }) {
             />
           </div>
           <div className="flex justify-end space-x-3 mt-6">
-            <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
-            <button type="submit" className="btn-primary">Save</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-colors border border-white/10 backdrop-blur-sm">Cancel</button>
+            <button type="submit" className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-colors shadow-[0_2px_10px_rgba(37,99,235,0.3)]">Save</button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

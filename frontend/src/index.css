@@ -3,75 +3,87 @@
 @tailwind utilities;
 
 body {
-  background: #111827;
-  color: white;
+  background: #0A0A0B;
+  color: #f3f4f6;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+@layer base {
+  :root {
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(20, 20, 25, 0.6);
+  }
+}
+
 .glass-card {
-  background: rgba(31, 41, 55, 0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(55, 65, 81, 0.5);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  background: rgba(30, 30, 35, 0.4);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.05), 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 .input-modern {
   display: block;
   width: 100%;
-  background: rgba(31, 41, 55, 0.8);
-  border: 1px solid #374151;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #f3f4f6;
   padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  transition: all 0.2s;
+  border-radius: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
   font-size: 0.95rem;
-  box-sizing: border-box;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
 .input-modern:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 2px rgba(59, 130, 246, 0.2);
+  background: rgba(255, 255, 255, 0.05);
 }
 .input-modern::placeholder {
-  color: #9ca3af;
+  color: #6b7280;
 }
 
 .btn-primary {
-  background: linear-gradient(to right, #3b82f6, #4f46e5);
+  background: linear-gradient(to bottom, #3b82f6, #2563eb);
   color: white;
   padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  transition: all 0.2s;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-primary:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
 .btn-secondary {
-  background: #374151;
+  background: rgba(255,255,255,0.05);
   color: white;
   padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-secondary:hover {
-  background: #4b5563;
+  background: rgba(255,255,255,0.08);
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #1f2937;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #374151;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4b5563;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* ---- LiveKit overrides ---- */

@@ -6,9 +6,11 @@ import {
   ControlBar,
   ParticipantTile,
   useParticipants,
+  useIsSpeaking
 } from '@livekit/components-react';
 import { Track, ParticipantEvent } from 'livekit-client';
 import '@livekit/components-styles';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function ParticipantWrapper({ participant }) {
   const [isMicMuted, setIsMicMuted] = useState(!participant.isMicrophoneEnabled);
@@ -63,28 +65,46 @@ function ParticipantWrapper({ participant }) {
     source: Track.Source.Camera,
   };
 
+  const isSpeaking = useIsSpeaking(participant);
+
   return (
-    <div className="relative bg-gray-800 rounded-xl overflow-hidden shadow-lg border-2 border-blue-500 h-full min-h-[200px]">
-      <ParticipantTile trackRef={trackRef} className="w-full h-full [&>.lk-participant-placeholder]:opacity-0" />
+    <motion.div 
+      layout
+      initial={{ opacity: 0, scale: 0.8, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.8, y: -20 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      className={`relative rounded-3xl overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] h-full min-h-[200px] transition-all duration-300 ${
+        isSpeaking ? 'bg-white/15 border-2 border-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.5)]' : 'bg-white/5 border border-white/10'
+      } backdrop-blur-xl`}
+    >
+      {/* Glossy overlay */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none z-10" />
+
+      <ParticipantTile trackRef={trackRef} className="w-full h-full [&>.lk-participant-placeholder]:opacity-0 relative z-0" />
       
       {isCamMuted && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 pointer-events-none z-10">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg overflow-hidden border-2 border-gray-700">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/60 backdrop-blur-md pointer-events-none z-10">
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={`w-24 h-24 rounded-full flex items-center justify-center shadow-2xl overflow-hidden border-2 ${isSpeaking ? 'border-blue-400' : 'border-white/20'} bg-gradient-to-br from-indigo-500/80 to-purple-600/80 backdrop-blur-sm`}
+          >
             {avatar ? (
               <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-4xl font-bold text-white">{initial}</span>
+              <span className="text-4xl font-bold text-white shadow-sm">{initial}</span>
             )}
-          </div>
+          </motion.div>
         </div>
       )}
       
-      <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-white flex items-center gap-2 z-20">
+      <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-full text-sm font-medium text-white flex items-center gap-2 z-20 border border-white/10 shadow-lg">
         <span>{isLocal ? 'You' : displayName}</span>
       </div>
 
       {isMicMuted && (
-        <div className="absolute top-3 right-3 bg-red-500 p-1.5 rounded-full text-white shadow-lg z-20">
+        <div className="absolute top-4 right-4 bg-red-500/80 backdrop-blur-md p-2 rounded-full text-white shadow-lg z-20 border border-red-400/50">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="1" y1="1" x2="23" y2="23"></line>
             <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
@@ -94,7 +114,7 @@ function ParticipantWrapper({ participant }) {
           </svg>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -117,10 +137,12 @@ function VideoGrid() {
   };
 
   return (
-    <div className={`grid ${colClasses[cols]} gap-3 p-3 h-full w-full`}>
+    <div className={`grid ${colClasses[cols]} gap-4 p-4 h-full w-full max-w-[1600px] mx-auto`}>
+      <AnimatePresence>
       {participants.map((p) => (
         <ParticipantWrapper key={p.identity} participant={p} />
       ))}
+      </AnimatePresence>
       {participants.length === 0 && (
         <div className="col-span-full text-center text-gray-400 text-lg">
           Waiting for others to join...
@@ -185,9 +207,12 @@ export default function VoiceVideoChannel({ channel, serverId, token, onLeave })
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#1a1a2e]">
-      <div className="p-3 bg-[#16213e] text-white font-bold border-b border-gray-700 flex-shrink-0">
-        🔊 {channel.name}
+    <div className="h-full flex flex-col bg-transparent relative z-10">
+      <div className="p-4 bg-white/5 backdrop-blur-xl text-white font-bold border-b border-white/10 flex-shrink-0 shadow-sm z-20 flex items-center space-x-3">
+        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+          🔊
+        </div>
+        <span className="tracking-wide">{channel.name}</span>
       </div>
       <div className="flex-1 min-h-0 relative flex flex-col">
         <LiveKitRoom

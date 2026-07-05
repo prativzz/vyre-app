@@ -10,6 +10,11 @@ import DirectMessages from '../components/DirectMessages';
 import ProfileModal from '../components/ProfileModal';
 import CreateServerModal from '../components/CreateServerModal';
 import { MessageSquare, Menu, Users, X } from 'lucide-react';
+import SpatialBackground from './layout/SpatialBackground';
+import GlassPanel from './ui/GlassPanel';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useCursorGlow } from '../hooks/useCursorGlow';
+
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
   const { socket } = useSocket(token);
@@ -274,9 +279,19 @@ export default function Dashboard() {
   const onlineCount = members.filter(m => m.online).length;
   const friendsOnline = friends.filter(f => f.online).length;
 
+  const cursor = useCursorGlow();
+
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-900 to-black overflow-hidden relative">
+    <div className="flex h-screen bg-transparent overflow-hidden relative selection:bg-blue-500/30">
+      <SpatialBackground />
       
+      {/* Custom Cursor Glow */}
+      <div 
+        className="pointer-events-none fixed inset-0 z-50 transition-opacity duration-300 hidden md:block"
+        style={{
+          background: `radial-gradient(600px circle at ${cursor.x}px ${cursor.y}px, rgba(255,255,255,0.06), transparent 40%)`
+        }}
+      />
       {/* Mobile Header (visible only on small screens) */}
       <div className="lg:hidden flex items-center justify-between p-3 bg-gray-900 border-b border-gray-800 absolute top-0 w-full z-30">
         <button 
@@ -297,7 +312,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Container for all content */}
-      <div className="flex flex-1 w-full h-full pt-[60px] lg:pt-0">
+      <div className="flex flex-1 w-full h-full pt-[60px] lg:pt-0 p-0 lg:p-4 gap-4 z-10">
         
         {/* Left Sidebars Wrapper */}
         <div className={`
@@ -350,7 +365,7 @@ export default function Dashboard() {
         )}
         
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col bg-gray-800/40 backdrop-blur-sm rounded-2xl shadow-2xl w-full">
+        <GlassPanel blur="xl" className="flex-1 flex flex-col w-full h-full">
         {!selectedServer && !selectedFriend ? (
           // Home page when no server and no friend selected
           <div className="flex flex-1 items-center justify-center px-4">
@@ -387,11 +402,11 @@ export default function Dashboard() {
             }}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500 text-lg">
+          <div className="flex items-center justify-center h-full text-gray-500 text-lg font-medium">
             Select a channel to start chatting
           </div>
         )}
-      </div>
+        </GlassPanel>
 
       {/* Right Overlay */}
       {showRightSidebar && (
@@ -402,10 +417,14 @@ export default function Dashboard() {
       )}
 
       {/* Right sidebar */}
-      <div className={`
-        absolute lg:relative right-0 z-40 h-full w-72 bg-gray-900/40 backdrop-blur-sm border-l border-gray-800 p-4 flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out
-        ${showRightSidebar ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
-      `}>
+      <GlassPanel 
+        blur="lg"
+        className={`
+          absolute lg:relative right-0 z-40 h-full w-72 flex flex-col overflow-y-auto transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
+          ${showRightSidebar ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+        `}
+      >
+        <div className="p-4 flex flex-col h-full">
         {!selectedServer ? (
 
           // ----- HOME PAGE: Friends + Pending Requests -----
@@ -542,7 +561,8 @@ export default function Dashboard() {
             Logout
           </button>
         </div>
-      </div>
+        </div>
+      </GlassPanel>
 
       {showProfileModal && (
         <ProfileModal
