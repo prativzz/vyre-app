@@ -149,7 +149,7 @@ io.on('connection', (socket) => {
     delete userSocketMap[socket.userId];
     console.log(`❌ User ${socket.username} (${socket.userId}) disconnected`);
   });
-
+});
 
 const resolveMx = promisify(dns.resolveMx);
 
