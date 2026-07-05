@@ -30,7 +30,6 @@ export default function HeroInteraction({ children }) {
       const R = 6;
       const drawR = 5;
       const W = Math.sqrt(3) * R;
-      const H = 2 * R;
       const xSpacing = W;
       const ySpacing = 1.5 * R;
       
