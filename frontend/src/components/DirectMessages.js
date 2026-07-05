@@ -90,7 +90,7 @@ export default function DirectMessages({ friend, token, socket, user }) {
       <div className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth">
         <AnimatePresence initial={false}>
         {messages.map((m) => {
-          const isMine = m.sender_id === user.id;
+          const isMine = String(m.sender_id) === String(user.id);
           return (
             <motion.div 
               key={m.id} 

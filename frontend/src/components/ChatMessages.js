@@ -54,7 +54,7 @@ export default function ChatMessages({ channelId, token, socket, user }) {
     setReplyTo(null);
   };
 
-  const isOwnMessage = (msg) => msg.userId === user?.id;
+  const isOwnMessage = (msg) => String(msg.userId || msg.user_id || msg.userid) === String(user?.id);
   const getInitial = (name) => name ? name.charAt(0).toUpperCase() : '?';
 
   return (
@@ -122,7 +122,7 @@ export default function ChatMessages({ channelId, token, socket, user }) {
                 </div>
               </div>
               <span className={`text-[10px] text-vyre-muted mt-1 font-pixel tracking-widest uppercase ${isMine ? 'mr-12' : 'ml-12'}`}>
-                {m.created_at ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(m.created_at)) : ''}
+                {(m.created_at || m.createdAt) ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(m.created_at || m.createdAt)) : ''}
               </span>
             </motion.div>
           );
