@@ -1,19 +1,22 @@
 import React, { useEffect, useRef } from 'react';
 
-const COLORS = ['#10B981', '#34D399', '#84CC16', '#F3F3F3', '#FDE047'];
+const COLORS = [
+  { r: 16, g: 185, b: 129 }, // Emerald
+  { r: 52, g: 211, b: 153 }, // Mint
+  { r: 132, g: 204, b: 22 },  // Lime
+  { r: 253, g: 224, b: 71 }, // Soft Yellow
+  { r: 243, g: 243, b: 243 }  // Soft White
+];
 
 export default function HeroInteraction({ children }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Mutable state for the animation loop
   const state = useRef({
     x: 0,
     y: 0,
-    lastX: 0,
-    lastY: 0,
     isHovering: false,
-    particles: [],
+    hexes: [],
     width: 0,
     height: 0
   });
@@ -23,13 +26,63 @@ export default function HeroInteraction({ children }) {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
 
+    const generateGrid = (width, height) => {
+      const R = 6;
+      const drawR = 5;
+      const W = Math.sqrt(3) * R;
+      const H = 2 * R;
+      const xSpacing = W;
+      const ySpacing = 1.5 * R;
+      
+      const cols = Math.ceil(width / xSpacing) + 2;
+      const rows = Math.ceil(height / ySpacing) + 2;
+
+      const hexes = [];
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = col * xSpacing + (row % 2 === 1 ? xSpacing / 2 : 0);
+          const y = row * ySpacing;
+          
+          const path = new Path2D();
+          for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 180) * (60 * i - 30);
+            const px = x + drawR * Math.cos(angle);
+            const py = y + drawR * Math.sin(angle);
+            if (i === 0) path.moveTo(px, py);
+            else path.lineTo(px, py);
+          }
+          path.closePath();
+          
+          const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+          
+          hexes.push({
+            x, y,
+            path,
+            r: color.r,
+            g: color.g,
+            b: color.b,
+            maxOpacity: 0.15 + Math.random() * 0.25, // 15% to 40%
+            currentOpacity: 0
+          });
+        }
+      }
+      return hexes;
+    };
+
     const resize = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
+        // Handle high DPI displays for crisp rendering
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        
         state.current.width = rect.width;
         state.current.height = rect.height;
+        
+        // Regenerate grid only on resize to maintain performance
+        state.current.hexes = generateGrid(rect.width, rect.height);
       }
     };
     
@@ -38,54 +91,41 @@ export default function HeroInteraction({ children }) {
 
     const render = () => {
       const s = state.current;
-      
       ctx.clearRect(0, 0, s.width, s.height);
 
-      // Calculate mouse speed
-      const dx = s.x - s.lastX;
-      const dy = s.y - s.lastY;
-      const speed = Math.hypot(dx, dy);
+      const revealRadius = 140;
+      const fadeInSpeed = 1 / 10;  // ~160ms at 60fps
+      const fadeOutSpeed = 1 / 20; // ~330ms at 60fps
 
-      // Spawn particles if moving and hovering
-      if (s.isHovering && speed > 0.5 && s.particles.length < 12) {
-        // Chance to spawn based on speed, but keep it minimal
-        if (Math.random() < 0.3) {
-          s.particles.push({
-            x: s.x + (Math.random() - 0.5) * 40,
-            y: s.y + (Math.random() - 0.5) * 40,
-            vx: (Math.random() - 0.5) * 0.4,
-            vy: (Math.random() - 0.5) * 0.4,
-            size: Math.random() > 0.8 ? (Math.random() > 0.5 ? 4 : 3) : 2,
-            color: COLORS[Math.floor(Math.random() * COLORS.length)],
-            opacity: Math.random() * 0.5 + 0.2, // 20% to 70%
-            life: 1.0 // 1.0 down to 0
-          });
-        }
-      }
-
-      // Update and draw particles
-      for (let i = s.particles.length - 1; i >= 0; i--) {
-        const p = s.particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= 0.015; // fade out speed
-
-        if (p.life <= 0) {
-          s.particles.splice(i, 1);
-          continue;
-        }
-
-        const currentOpacity = p.opacity * p.life;
+      for (let i = 0; i < s.hexes.length; i++) {
+        const hex = s.hexes[i];
+        let target = 0;
         
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = currentOpacity;
-        ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
+        if (s.isHovering) {
+          const dx = s.x - hex.x;
+          const dy = s.y - hex.y;
+          const distSq = dx * dx + dy * dy;
+          
+          if (distSq < revealRadius * revealRadius) {
+            const dist = Math.sqrt(distSq);
+            // Smooth easing for intensity instead of linear dropoff
+            const intensity = 1 - (dist / revealRadius);
+            const easeIntensity = intensity * intensity; 
+            target = hex.maxOpacity * easeIntensity;
+          }
+        }
+        
+        if (hex.currentOpacity < target) {
+          hex.currentOpacity = Math.min(target, hex.currentOpacity + fadeInSpeed);
+        } else if (hex.currentOpacity > target) {
+          hex.currentOpacity = Math.max(target, hex.currentOpacity - fadeOutSpeed);
+        }
+        
+        if (hex.currentOpacity > 0.01) {
+          ctx.fillStyle = `rgba(${hex.r}, ${hex.g}, ${hex.b}, ${hex.currentOpacity.toFixed(3)})`;
+          ctx.fill(hex.path);
+        }
       }
-
-      ctx.globalAlpha = 1.0;
-      
-      s.lastX = s.x;
-      s.lastY = s.y;
       
       animationFrameId = requestAnimationFrame(render);
     };
@@ -124,6 +164,7 @@ export default function HeroInteraction({ children }) {
       <canvas 
         ref={canvasRef}
         className="absolute inset-0 pointer-events-none z-0"
+        style={{ width: '100%', height: '100%' }}
       />
       <div className="relative z-10 flex flex-1 items-center justify-center">
         {children}
