@@ -4,7 +4,7 @@ export default function ServerButton({ server, isActive, onClick }) {
   const initial = server.name ? server.name[0].toUpperCase() : '?';
 
   return (
-    <div className="relative flex items-center justify-center w-full group mb-3">
+    <div className="relative flex items-center justify-center w-full group">
       {/* Side Pill Indicator */}
       <div className="absolute left-0 flex items-center h-full">
         <div 
