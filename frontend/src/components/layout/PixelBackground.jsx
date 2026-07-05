@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 export default function PixelBackground() {
   const particles = useMemo(() => {
-    return Array.from({ length: 50 }).map((_, i) => ({
+    return Array.from({ length: 120 }).map((_, i) => ({
       id: i,
       left: `${Math.random() * 100}%`,
       top: `${Math.random() * 100}%`,
