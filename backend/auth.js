@@ -91,7 +91,7 @@ export async function completeGoogleUser(onboardingToken, username, password) {
   try {
     await db.run(
       'INSERT INTO users (id, email, username, display_name, avatar, password_hash) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, email, username, name, "", hashed]
+      [userId, email, username, "", "", hashed]
     );
     const user = await db.get('SELECT * FROM users WHERE id = ?', [userId]);
     const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
