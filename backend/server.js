@@ -642,7 +642,7 @@ app.delete('/api/user', async (req, res) => {
   } catch (err) {
     try { await db.run('ROLLBACK'); } catch (e) {}
     console.error('❌ Delete account error:', err);
-    res.status(500).json({ success: false, error: 'Internal server error' });
+    res.status(500).json({ success: false, error: 'Delete failed: ' + err.message });
   }
 });
 
