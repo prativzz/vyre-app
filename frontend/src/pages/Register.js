@@ -26,13 +26,13 @@ export default function Register() {
       return;
     }
 
-    const success = await register(email, username, password);
-    if (success) {
+    const result = await register(email, username, password);
+    if (result.success) {
       const loggedIn = await login(email, password);
       if (loggedIn) navigate('/');
       else navigate('/login');
     } else {
-      setError('Email or username already exists');
+      setError(result.error || 'Email or username already exists');
     }
   };
 

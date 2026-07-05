@@ -57,14 +57,11 @@ export function AuthProvider({ children }) {
       console.log("📝 Registering:", email, username);
       const res = await axios.post(`${API_URL}/register`, { email, username, password });
       console.log("📦 Register response:", res.data);
-      return res.data.success;
+      return res.data;
     } catch (err) {
       console.error("❌ Register error:", err.message);
-      if (err.response) {
-        console.error("Response data:", err.response.data);
-        console.error("Status:", err.response.status);
-      }
-      return false;
+      if (err.response) return err.response.data;
+      return { success: false, error: 'Network error' };
     }
   };
 

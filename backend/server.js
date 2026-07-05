@@ -5,6 +5,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { initializeDb, db } from './db.js';
 import { registerUser, loginUser, verifyToken, googleLoginUser, completeGoogleUser } from './auth.js';
+import dns from 'dns';
+import { promisify } from 'util';
 import { v4 as uuidv4 } from 'uuid';
 import { AccessToken } from 'livekit-server-sdk';
 import bcrypt from 'bcrypt';
@@ -147,12 +149,32 @@ io.on('connection', (socket) => {
     delete userSocketMap[socket.userId];
     console.log(`❌ User ${socket.username} (${socket.userId}) disconnected`);
   });
-});
+
+
+const resolveMx = promisify(dns.resolveMx);
+
+async function isValidEmailDomain(email) {
+  const domain = email.split('@')[1];
+  if (!domain) return false;
+  try {
+    const addresses = await resolveMx(domain);
+    return addresses && addresses.length > 0;
+  } catch (err) {
+    return false;
+  }
+}
 
 // REST endpoints
 app.post('/api/register', async (req, res) => {
   const { email, username, password } = req.body;
   if (!email || !username || !password) return res.status(400).json({ error: 'Missing fields' });
+  
+  // Validate if email domain is real
+  const isValidDomain = await isValidEmailDomain(email);
+  if (!isValidDomain) {
+    return res.status(400).json({ error: 'Invalid or fake email address' });
+  }
+
   const result = await registerUser(email, username, password);
   if (!result.success) return res.status(400).json({ error: result.error });
   res.json({ success: true, userId: result.userId });
