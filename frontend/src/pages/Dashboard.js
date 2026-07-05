@@ -41,15 +41,28 @@ export default function Dashboard() {
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef(null);
 
+  const currentServerIdRef = useRef(selectedServer?.id);
+
+  useEffect(() => {
+    currentServerIdRef.current = selectedServer?.id;
+  }, [selectedServer?.id]);
+
   const fetchChannels = useCallback(async (serverId) => {
-    const res = await fetch(`${API_URL}/servers/${serverId}/channels`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json();
-    setChannels(data);
+    try {
+      const res = await fetch(`${API_URL}/servers/${serverId}/channels`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      // Prevent race condition: ignore if user switched servers during fetch
+      if (currentServerIdRef.current !== serverId) return;
+      setChannels(data);
+    } catch (err) {
+      console.error('Failed to fetch channels:', err);
+    }
   }, [token]);
 
   const fetchMembers = useCallback(async () => {
+    const fetchId = selectedServer?.id;
     let url;
     if (selectedServer) {
       url = `${API_URL}/servers/${selectedServer.id}/members`;
@@ -61,6 +74,10 @@ export default function Dashboard() {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
+      
+      // Prevent race condition: ignore if user switched servers during fetch
+      if (currentServerIdRef.current !== fetchId) return;
+      
       if (Array.isArray(data)) {
         setMembers(data);
       } else {
