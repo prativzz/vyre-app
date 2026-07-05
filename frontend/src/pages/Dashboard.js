@@ -301,11 +301,11 @@ export default function Dashboard() {
       </div>
 
       {/* Main Container for all content */}
-      <div className="flex flex-1 w-full h-full pt-[60px] lg:pt-0 p-0 lg:p-4 gap-4 z-10 max-w-[1920px] mx-auto">
+      <div className="flex flex-1 w-full h-full pt-[60px] p-2 lg:p-6 gap-4 z-10 max-w-[1920px] mx-auto">
         
         {/* Left Sidebars Wrapper */}
         <div className={`
-          absolute lg:relative z-40 h-full flex transform transition-transform duration-300 ease-in-out
+          absolute lg:relative z-40 h-full flex gap-4 transform transition-transform duration-300 ease-in-out
           ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
           <ServerSidebar
