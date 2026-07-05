@@ -2,10 +2,11 @@ import React, { useEffect, useRef } from 'react';
 
 const getRandomColor = () => {
   const rand = Math.random();
-  if (rand < 0.60) return '#22C55E'; // Emerald Green
-  if (rand < 0.75) return '#34D399';
-  if (rand < 0.90) return '#16A34A';
-  return '#4ADE80';
+  if (rand < 0.40) return '#20C997'; // Primary
+  if (rand < 0.70) return '#16B388'; // Secondary
+  if (rand < 0.85) return '#14866C'; // Dark Accent
+  if (rand < 0.95) return 'rgba(32, 201, 151, 0.12)'; // Very dark cells
+  return '#34D399'; // Highlight (sparingly)
 };
 
 export default function HeroInteraction({ children }) {
@@ -27,9 +28,8 @@ export default function HeroInteraction({ children }) {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
 
-    // Create standard hexagon path centered at 0,0
     const hexPath = new Path2D();
-    const drawR = 11; // 1px gap from R=12 for the honeycomb look
+    const drawR = 14; // Increased from 11 (approx 25% bigger)
     for (let i = 0; i < 6; i++) {
       const angle = (Math.PI / 180) * (60 * i - 30);
       const px = drawR * Math.cos(angle);
@@ -40,7 +40,7 @@ export default function HeroInteraction({ children }) {
     hexPath.closePath();
 
     const generateGrid = (width, height) => {
-      const R = 12; // 12px radius -> roughly 24px wide hex (user asked for larger 10-14px)
+      const R = 15.5; // Increased from 12 (approx 30% bigger). Spacing proportional.
       const W = Math.sqrt(3) * R;
       const xSpacing = W;
       const ySpacing = 1.5 * R;
@@ -57,12 +57,13 @@ export default function HeroInteraction({ children }) {
           hexes.push({
             x, y,
             color: getRandomColor(),
-            noise: Math.random() * 30 - 15, // Non-symmetrical noise
-            delayOut: Math.random() * 200,  // 0-200ms delay before fade out
-            fadeInSpeed: 1000 / (120 + Math.random() * 60), // 120-180ms fade in
-            fadeSpeed: 1000 / (400 + Math.random() * 300),  // 400-700ms fade out
+            // Drastically increase noise so only a sparse, random selection falls into the active radius
+            noise: Math.random() * 80 - 40, 
+            delayOut: Math.random() * 200, 
+            fadeInSpeed: 1000 / 120, // 120ms fade in
+            fadeSpeed: 1000 / (500 + Math.random() * 200),  // 500-700ms fade out
             opacity: 0,
-            scale: 0.9,
+            scale: 0.92, // 0.92 -> 1.0
             timeSinceInactive: 0
           });
         }
@@ -89,7 +90,7 @@ export default function HeroInteraction({ children }) {
 
     const render = (time) => {
       const s = state.current;
-      const dt = Math.min((time - s.lastTime) / 1000, 0.1); // Cap dt at 100ms to prevent huge jumps
+      const dt = Math.min((time - s.lastTime) / 1000, 0.1);
       s.lastTime = time;
 
       ctx.clearRect(0, 0, s.width, s.height);
@@ -103,21 +104,22 @@ export default function HeroInteraction({ children }) {
           const dy = s.y - hex.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           
-          // Effective distance incorporates noise so the cluster isn't perfectly round
-          if (dist + hex.noise < 55) {
+          // Using a strict distance threshold combined with the high random noise 
+          // to dramatically reduce density (only ~10-15 hexes will trigger)
+          if (dist + hex.noise < 45) {
             isNearCursor = true;
           }
         }
         
         if (isNearCursor) {
           hex.opacity = Math.min(1, hex.opacity + dt * hex.fadeInSpeed);
-          hex.scale = Math.min(1, hex.scale + dt * (0.1 * hex.fadeInSpeed));
+          hex.scale = Math.min(1, hex.scale + dt * (0.08 * hex.fadeInSpeed)); // 0.92 to 1.0 is 0.08 difference
           hex.timeSinceInactive = 0;
         } else {
           hex.timeSinceInactive += dt * 1000;
           if (hex.timeSinceInactive > hex.delayOut) {
             hex.opacity = Math.max(0, hex.opacity - dt * hex.fadeSpeed);
-            hex.scale = Math.max(0.9, hex.scale - dt * (0.1 * hex.fadeSpeed));
+            hex.scale = Math.max(0.92, hex.scale - dt * (0.08 * hex.fadeSpeed));
           }
         }
         
