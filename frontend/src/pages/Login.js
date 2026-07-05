@@ -32,9 +32,16 @@ export default function Login() {
 
   const handleGoogleAuth = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      const success = await googleLogin(tokenResponse.access_token);
-      if (success) navigate('/');
-      else setError('Google Login Failed');
+      const result = await googleLogin(tokenResponse.access_token);
+      if (result.success) {
+        if (result.needsOnboarding) {
+          navigate('/complete-account', { state: { onboardingData: result } });
+        } else {
+          navigate('/');
+        }
+      } else {
+        setError('Google Login Failed');
+      }
     },
     onError: () => {
       setError('Google Login Failed');

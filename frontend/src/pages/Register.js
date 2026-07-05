@@ -38,9 +38,16 @@ export default function Register() {
 
   const handleGoogleAuth = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      const success = await googleLogin(tokenResponse.access_token);
-      if (success) navigate('/');
-      else setError('Google Signup Failed');
+      const result = await googleLogin(tokenResponse.access_token);
+      if (result.success) {
+        if (result.needsOnboarding) {
+          navigate('/complete-account', { state: { onboardingData: result } });
+        } else {
+          navigate('/');
+        }
+      } else {
+        setError('Google Signup Failed');
+      }
     },
     onError: () => {
       setError('Google Signup Failed');

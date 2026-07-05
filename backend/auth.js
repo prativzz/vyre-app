@@ -44,16 +44,14 @@ export async function googleLoginUser(email, name, picture) {
   let user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
   
   if (!user) {
-    const userId = uuidv4();
-    const randomPasswordHash = await bcrypt.hash(uuidv4(), 10);
-    // Create a sensible default username
-    let username = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') + Math.floor(Math.random() * 1000);
-    
-    await db.run(
-      'INSERT INTO users (id, email, username, display_name, avatar, password_hash) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, email, username, name, "", randomPasswordHash]
-    );
-    user = await db.get('SELECT * FROM users WHERE id = ?', [userId]);
+    const tempToken = jwt.sign({ email, name, isPending: true }, JWT_SECRET, { expiresIn: '1h' });
+    return {
+      success: true,
+      needsOnboarding: true,
+      onboardingToken: tempToken,
+      email,
+      name
+    };
   }
   
   const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
@@ -76,5 +74,42 @@ export function verifyToken(token) {
     return jwt.verify(token, JWT_SECRET);
   } catch {
     return null;
+  }
+}
+
+export async function completeGoogleUser(onboardingToken, username, password) {
+  const decoded = verifyToken(onboardingToken);
+  if (!decoded || !decoded.isPending) {
+    return { success: false, error: 'Invalid or expired onboarding session' };
+  }
+
+  const { email, name } = decoded;
+
+  const hashed = await bcrypt.hash(password, 10);
+  const userId = uuidv4();
+  
+  try {
+    await db.run(
+      'INSERT INTO users (id, email, username, display_name, avatar, password_hash) VALUES (?, ?, ?, ?, ?, ?)',
+      [userId, email, username, name, "", hashed]
+    );
+    const user = await db.get('SELECT * FROM users WHERE id = ?', [userId]);
+    const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+    
+    return {
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        display_name: user.display_name || user.username,
+        avatar: user.avatar || '',
+        status: user.status || ''
+      }
+    };
+  } catch (err) {
+    if (err.message.includes('UNIQUE')) return { success: false, error: 'Username already exists' };
+    throw err;
   }
 }

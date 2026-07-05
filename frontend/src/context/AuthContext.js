@@ -110,20 +110,43 @@ export function AuthProvider({ children }) {
     try {
       const res = await axios.post(`${API_URL}/auth/google`, { token: googleToken });
       if (res.data.success) {
+        if (res.data.needsOnboarding) {
+          return res.data;
+        }
         setToken(res.data.token);
         setUser(res.data.user);
         localStorage.setItem('token', res.data.token);
-        return true;
+        return { success: true };
       }
-      return false;
+      return { success: false };
     } catch (err) {
       console.error("❌ Google Login error:", err.message);
-      return false;
+      return { success: false, error: err.message };
+    }
+  };
+
+  const completeGoogleOnboarding = async (onboardingToken, username, password) => {
+    try {
+      const res = await axios.post(`${API_URL}/auth/complete-google`, {
+        onboardingToken,
+        username,
+        password
+      });
+      if (res.data.success) {
+        setToken(res.data.token);
+        setUser(res.data.user);
+        localStorage.setItem('token', res.data.token);
+        return { success: true };
+      }
+      return res.data;
+    } catch (err) {
+      if (err.response) return err.response.data;
+      return { success: false, error: 'Network error' };
     }
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, register, logout, changePassword, deleteAccount, googleLogin }}>
+    <AuthContext.Provider value={{ token, user, login, register, logout, changePassword, deleteAccount, googleLogin, completeGoogleOnboarding }}>
       {children}
     </AuthContext.Provider>
   );

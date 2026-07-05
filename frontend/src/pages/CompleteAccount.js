@@ -1,0 +1,144 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Eye, EyeOff } from 'lucide-react';
+import PixelBackground from '../components/layout/PixelBackground';
+import PixelPanel from '../components/ui/PixelPanel';
+
+export default function CompleteAccount() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { completeGoogleOnboarding } = useAuth();
+  
+  // Extract onboarding data
+  const onboardingData = location.state?.onboardingData;
+  const email = onboardingData?.email || '';
+  const onboardingToken = onboardingData?.onboardingToken || '';
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+
+  // If accessed without valid state, redirect to login
+  useEffect(() => {
+    if (!onboardingData || !onboardingToken) {
+      navigate('/login');
+    }
+  }, [onboardingData, onboardingToken, navigate]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    const result = await completeGoogleOnboarding(onboardingToken, username, password);
+    if (result.success) {
+      navigate('/');
+    } else {
+      setError(result.error || 'Failed to complete registration');
+    }
+  };
+
+  if (!onboardingData || !onboardingToken) return null;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, filter: 'blur(10px)', scale: 0.98 }}
+      animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
+      exit={{ opacity: 0, filter: 'blur(10px)', scale: 0.98 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      className="min-h-screen flex items-center justify-center bg-vyre-bg p-4 relative overflow-hidden"
+    >
+      <PixelBackground />
+
+      <PixelPanel className="p-8 w-full max-w-md animate-fade-in relative z-10 flex flex-col items-center">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold font-pixel text-vyre-accent tracking-widest uppercase">
+            Complete Setup
+          </h1>
+          <p className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest mt-4">One last step</p>
+        </div>
+        <form onSubmit={handleSubmit} className="w-full space-y-4" autoComplete="off">
+          <AnimatePresence>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                className="bg-red-500/10 border border-red-500/20 text-red-400 font-pixel text-[10px] tracking-wider uppercase rounded-lg p-3 text-center overflow-hidden"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          <div>
+            <input
+              type="email"
+              className="input-minimal w-full font-medium opacity-50 cursor-not-allowed"
+              value={email}
+              disabled
+            />
+          </div>
+          
+          <div>
+            <input
+              type="text"
+              placeholder="Username"
+              className="input-minimal w-full font-medium"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="relative w-full">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Password"
+              className="input-minimal w-full pr-10 font-medium"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-vyre-muted hover:text-vyre-text transition-colors"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+
+          <div className="relative w-full">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Confirm Password"
+              className="input-minimal w-full pr-10 font-medium"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn-primary w-full py-3 uppercase tracking-wider font-pixel text-xs mt-4">
+            Finish Setup
+          </button>
+        </form>
+      </PixelPanel>
+    </motion.div>
+  );
+}

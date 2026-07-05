@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { initializeDb, db } from './db.js';
-import { registerUser, loginUser, verifyToken, googleLoginUser } from './auth.js';
+import { registerUser, loginUser, verifyToken, googleLoginUser, completeGoogleUser } from './auth.js';
 import { v4 as uuidv4 } from 'uuid';
 import { AccessToken } from 'livekit-server-sdk';
 import bcrypt from 'bcrypt';
@@ -173,6 +173,20 @@ app.post('/api/auth/google', async (req, res) => {
   } catch (err) {
     console.error("Google Auth Error:", err);
     res.status(401).json({ success: false, error: "Invalid Google token" });
+  }
+});
+
+app.post('/api/auth/complete-google', async (req, res) => {
+  const { onboardingToken, username, password } = req.body;
+  if (!onboardingToken || !username || !password) {
+    return res.status(400).json({ success: false, error: 'Missing fields' });
+  }
+  try {
+    const result = await completeGoogleUser(onboardingToken, username, password);
+    res.json(result);
+  } catch (err) {
+    console.error("Complete Google Auth Error:", err);
+    res.status(500).json({ success: false, error: "Failed to complete setup" });
   }
 });
 

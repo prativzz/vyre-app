@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AnimatePresence } from 'framer-motion';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import CompleteAccount from './pages/CompleteAccount';
 import Dashboard from './pages/Dashboard';
 
 function PrivateRoute({ children }) {
@@ -17,6 +18,7 @@ function AnimatedRoutes() {
       <Routes location={location} key={location.pathname}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/complete-account" element={<CompleteAccount />} />
         <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
       </Routes>
     </AnimatePresence>
