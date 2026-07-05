@@ -634,13 +634,8 @@ app.delete('/api/user', async (req, res) => {
       await db.run('DELETE FROM servers WHERE id = ?', [server.id]);
     }
 
-    // 4. Remove from friends table (if exists)
-    const tableCheck = await db.get(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='friends'"
-    );
-    if (tableCheck) {
-      await db.run('DELETE FROM friends WHERE user_id = ? OR friend_id = ?', [userId, userId]);
-    }
+    // 4. Remove from friends table
+    await db.run('DELETE FROM friends WHERE user_id = ? OR friend_id = ?', [userId, userId]);
 
     await db.run('COMMIT');
     res.json({ success: true });
