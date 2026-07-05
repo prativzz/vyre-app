@@ -23,7 +23,7 @@ export default function PixelBackground() {
       {particles.map(p => (
         <div
           key={p.id}
-          className="absolute bg-white rounded-none animate-float shadow-[0_0_2px_rgba(255,255,255,0.8)]"
+          className="absolute bg-vyre-accent rounded-sm animate-float shadow-[0_0_4px_rgba(16,185,129,0.6)]"
           style={{
             left: p.left,
             top: p.top,
