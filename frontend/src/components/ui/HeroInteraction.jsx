@@ -12,6 +12,7 @@ const getRandomColor = () => {
 export default function HeroInteraction({ children }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
+  const contentRef = useRef(null);
 
   const state = useRef({
     x: 0,
@@ -20,6 +21,7 @@ export default function HeroInteraction({ children }) {
     hexes: [],
     width: 0,
     height: 0,
+    contentBox: null,
     lastTime: performance.now()
   });
 
@@ -29,7 +31,7 @@ export default function HeroInteraction({ children }) {
     let animationFrameId;
 
     const hexPath = new Path2D();
-    const drawR = 14; // Increased from 11 (approx 25% bigger)
+    const drawR = 14; 
     for (let i = 0; i < 6; i++) {
       const angle = (Math.PI / 180) * (60 * i - 30);
       const px = drawR * Math.cos(angle);
@@ -39,8 +41,8 @@ export default function HeroInteraction({ children }) {
     }
     hexPath.closePath();
 
-    const generateGrid = (width, height) => {
-      const R = 15.5; // Increased from 12 (approx 30% bigger). Spacing proportional.
+    const generateGrid = (width, height, contentBox) => {
+      const R = 15.5; 
       const W = Math.sqrt(3) * R;
       const xSpacing = W;
       const ySpacing = 1.5 * R;
@@ -54,16 +56,21 @@ export default function HeroInteraction({ children }) {
           const x = col * xSpacing + (row % 2 === 1 ? xSpacing / 2 : 0);
           const y = row * ySpacing;
           
+          let inTextBounds = false;
+          if (contentBox) {
+            inTextBounds = x > contentBox.left && x < contentBox.right && y > contentBox.top && y < contentBox.bottom;
+          }
+          
           hexes.push({
             x, y,
             color: getRandomColor(),
-            // Drastically increase noise so only a sparse, random selection falls into the active radius
             noise: Math.random() * 80 - 40, 
             delayOut: Math.random() * 200, 
-            fadeInSpeed: 1000 / 120, // 120ms fade in
+            fadeInSpeed: 1000 / (150 + Math.random() * 100), // 150-250ms fade in
             fadeSpeed: 1000 / (500 + Math.random() * 200),  // 500-700ms fade out
             opacity: 0,
-            scale: 0.92, // 0.92 -> 1.0
+            maxOpacity: inTextBounds ? (0.08 + Math.random() * 0.07) : (0.4 + Math.random() * 0.3), // 8-15% behind text, 40-70% elsewhere
+            scale: 0.92, 
             timeSinceInactive: 0
           });
         }
@@ -72,8 +79,21 @@ export default function HeroInteraction({ children }) {
     };
 
     const resize = () => {
-      if (containerRef.current) {
+      if (containerRef.current && canvasRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
+        
+        let contentBox = null;
+        if (contentRef.current) {
+          const textRect = contentRef.current.getBoundingClientRect();
+          contentBox = {
+            left: textRect.left - rect.left - 20,
+            right: textRect.right - rect.left + 20,
+            top: textRect.top - rect.top - 20,
+            bottom: textRect.bottom - rect.top + 20,
+          };
+          state.current.contentBox = contentBox;
+        }
+
         const dpr = window.devicePixelRatio || 1;
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;
@@ -81,12 +101,14 @@ export default function HeroInteraction({ children }) {
         
         state.current.width = rect.width;
         state.current.height = rect.height;
-        state.current.hexes = generateGrid(rect.width, rect.height);
+        state.current.hexes = generateGrid(rect.width, rect.height, contentBox);
       }
     };
     
     window.addEventListener('resize', resize);
-    resize();
+    
+    // Slight delay to ensure fonts/layout are loaded before calculating text bounds
+    setTimeout(resize, 100);
 
     const render = (time) => {
       const s = state.current;
@@ -104,16 +126,14 @@ export default function HeroInteraction({ children }) {
           const dy = s.y - hex.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           
-          // Using a strict distance threshold combined with the high random noise 
-          // to dramatically reduce density (only ~10-15 hexes will trigger)
           if (dist + hex.noise < 45) {
             isNearCursor = true;
           }
         }
         
         if (isNearCursor) {
-          hex.opacity = Math.min(1, hex.opacity + dt * hex.fadeInSpeed);
-          hex.scale = Math.min(1, hex.scale + dt * (0.08 * hex.fadeInSpeed)); // 0.92 to 1.0 is 0.08 difference
+          hex.opacity = Math.min(hex.maxOpacity, hex.opacity + dt * hex.fadeInSpeed);
+          hex.scale = Math.min(1, hex.scale + dt * (0.08 * hex.fadeInSpeed)); 
           hex.timeSinceInactive = 0;
         } else {
           hex.timeSinceInactive += dt * 1000;
@@ -174,7 +194,11 @@ export default function HeroInteraction({ children }) {
         style={{ width: '100%', height: '100%' }}
       />
       <div className="relative z-10 flex flex-1 items-center justify-center">
-        {children}
+        <div ref={contentRef} className="pointer-events-none">
+          <div className="pointer-events-auto">
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );
