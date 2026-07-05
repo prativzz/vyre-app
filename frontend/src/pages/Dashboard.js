@@ -429,27 +429,26 @@ export default function Dashboard() {
             </div>
             <div className="space-y-1 mb-4 flex-1 overflow-y-auto">
               {friends.map(f => (
-                <div key={f.friend_id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group cursor-pointer border border-transparent hover:border-vyre-border">
+                <div 
+                  key={f.friend_id} 
+                  onClick={() => { setSelectedServer(null); setSelectedFriend(f); }}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group cursor-pointer border border-transparent hover:border-vyre-border"
+                >
                   <div className="flex items-center space-x-3">
                     <span className={`w-2 h-2 rounded-[2px] shadow-sm ${f.online ? 'bg-vyre-accent' : 'bg-vyre-border'}`}></span>
                     <span className="text-sm font-medium text-vyre-text group-hover:text-white transition-colors">{f.display_name || f.username}</span>
                   </div>
-                  <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {f.online && (
-                      <span className="p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="w-2 h-2 rounded-full bg-green-500 shadow-sm shadow-green-500/50 inline-block mr-1"></span>
-                      </span>
-                    )}
+                  <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      onClick={() => { setSelectedServer(null); setSelectedFriend(f); }}
-                      className="p-1.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition shadow-md"
+                      onClick={(e) => { e.stopPropagation(); setSelectedServer(null); setSelectedFriend(f); }}
+                      className="p-1.5 rounded text-vyre-muted hover:text-vyre-accent hover:bg-vyre-accent/10 transition-colors"
                       title="Message"
                     >
                       <MessageSquare size={14} />
                     </button>
                     <button
-                      onClick={() => removeFriend(f.friend_id)}
-                      className="p-1.5 rounded-full text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                      onClick={(e) => { e.stopPropagation(); removeFriend(f.friend_id); }}
+                      className="p-1.5 rounded text-vyre-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
                       title="Remove Friend"
                     >
                       ✕
@@ -462,21 +461,21 @@ export default function Dashboard() {
 
             {pendingRequests.length > 0 && (
               <div className="mb-4">
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Friend Requests</h3>
+                <h3 className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest mb-3 mt-6">Friend Requests</h3>
                 <div className="space-y-1">
                   {pendingRequests.map(p => (
-                    <div key={p.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-700/50 transition-all duration-200 border border-transparent hover:border-gray-600/50">
-                      <span className="text-sm font-medium text-gray-200">{p.display_name || p.username}</span>
+                    <div key={p.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-vyre-secondary border border-vyre-border">
+                      <span className="text-sm font-medium text-vyre-text">{p.display_name || p.username}</span>
                       <div className="flex space-x-1">
                         <button
                           onClick={() => acceptFriendRequest(p.id)}
-                          className="text-xs bg-green-600 hover:bg-green-500 text-white px-2 py-0.5 rounded"
+                          className="font-pixel text-[9px] uppercase tracking-wider bg-vyre-accent/10 text-vyre-accent hover:bg-vyre-accent hover:text-[#111] px-2 py-1 rounded transition-colors"
                         >
                           Accept
                         </button>
                         <button
                           onClick={() => declineFriendRequest(p.id)}
-                          className="text-xs bg-red-600 hover:bg-red-500 text-white px-2 py-0.5 rounded"
+                          className="font-pixel text-[9px] uppercase tracking-wider bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-2 py-1 rounded transition-colors"
                         >
                           Decline
                         </button>
