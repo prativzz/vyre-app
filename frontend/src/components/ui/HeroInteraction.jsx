@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 
-const COLORS = [
-  { r: 16, g: 185, b: 129 }, // Emerald
-  { r: 52, g: 211, b: 153 }, // Mint
-  { r: 132, g: 204, b: 22 },  // Lime
-  { r: 253, g: 224, b: 71 }, // Soft Yellow
-  { r: 243, g: 243, b: 243 }  // Soft White
-];
+const getRandomColor = () => {
+  const rand = Math.random();
+  if (rand < 0.60) return '#22C55E'; // Emerald Green
+  if (rand < 0.75) return '#34D399';
+  if (rand < 0.90) return '#16A34A';
+  return '#4ADE80';
+};
 
 export default function HeroInteraction({ children }) {
   const canvasRef = useRef(null);
@@ -18,7 +18,8 @@ export default function HeroInteraction({ children }) {
     isHovering: false,
     hexes: [],
     width: 0,
-    height: 0
+    height: 0,
+    lastTime: performance.now()
   });
 
   useEffect(() => {
@@ -26,9 +27,20 @@ export default function HeroInteraction({ children }) {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
 
+    // Create standard hexagon path centered at 0,0
+    const hexPath = new Path2D();
+    const drawR = 11; // 1px gap from R=12 for the honeycomb look
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 180) * (60 * i - 30);
+      const px = drawR * Math.cos(angle);
+      const py = drawR * Math.sin(angle);
+      if (i === 0) hexPath.moveTo(px, py);
+      else hexPath.lineTo(px, py);
+    }
+    hexPath.closePath();
+
     const generateGrid = (width, height) => {
-      const R = 6;
-      const drawR = 5;
+      const R = 12; // 12px radius -> roughly 24px wide hex (user asked for larger 10-14px)
       const W = Math.sqrt(3) * R;
       const xSpacing = W;
       const ySpacing = 1.5 * R;
@@ -42,26 +54,16 @@ export default function HeroInteraction({ children }) {
           const x = col * xSpacing + (row % 2 === 1 ? xSpacing / 2 : 0);
           const y = row * ySpacing;
           
-          const path = new Path2D();
-          for (let i = 0; i < 6; i++) {
-            const angle = (Math.PI / 180) * (60 * i - 30);
-            const px = x + drawR * Math.cos(angle);
-            const py = y + drawR * Math.sin(angle);
-            if (i === 0) path.moveTo(px, py);
-            else path.lineTo(px, py);
-          }
-          path.closePath();
-          
-          const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-          
           hexes.push({
             x, y,
-            path,
-            r: color.r,
-            g: color.g,
-            b: color.b,
-            maxOpacity: 0.15 + Math.random() * 0.25, // 15% to 40%
-            currentOpacity: 0
+            color: getRandomColor(),
+            noise: Math.random() * 30 - 15, // Non-symmetrical noise
+            delayOut: Math.random() * 200,  // 0-200ms delay before fade out
+            fadeInSpeed: 1000 / (120 + Math.random() * 60), // 120-180ms fade in
+            fadeSpeed: 1000 / (400 + Math.random() * 300),  // 400-700ms fade out
+            opacity: 0,
+            scale: 0.9,
+            timeSinceInactive: 0
           });
         }
       }
@@ -71,7 +73,6 @@ export default function HeroInteraction({ children }) {
     const resize = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        // Handle high DPI displays for crisp rendering
         const dpr = window.devicePixelRatio || 1;
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;
@@ -79,8 +80,6 @@ export default function HeroInteraction({ children }) {
         
         state.current.width = rect.width;
         state.current.height = rect.height;
-        
-        // Regenerate grid only on resize to maintain performance
         state.current.hexes = generateGrid(rect.width, rect.height);
       }
     };
@@ -88,48 +87,55 @@ export default function HeroInteraction({ children }) {
     window.addEventListener('resize', resize);
     resize();
 
-    const render = () => {
+    const render = (time) => {
       const s = state.current;
-      ctx.clearRect(0, 0, s.width, s.height);
+      const dt = Math.min((time - s.lastTime) / 1000, 0.1); // Cap dt at 100ms to prevent huge jumps
+      s.lastTime = time;
 
-      const revealRadius = 140;
-      const fadeInSpeed = 1 / 10;  // ~160ms at 60fps
-      const fadeOutSpeed = 1 / 20; // ~330ms at 60fps
+      ctx.clearRect(0, 0, s.width, s.height);
 
       for (let i = 0; i < s.hexes.length; i++) {
         const hex = s.hexes[i];
-        let target = 0;
+        let isNearCursor = false;
         
         if (s.isHovering) {
           const dx = s.x - hex.x;
           const dy = s.y - hex.y;
-          const distSq = dx * dx + dy * dy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
           
-          if (distSq < revealRadius * revealRadius) {
-            const dist = Math.sqrt(distSq);
-            // Smooth easing for intensity instead of linear dropoff
-            const intensity = 1 - (dist / revealRadius);
-            const easeIntensity = intensity * intensity; 
-            target = hex.maxOpacity * easeIntensity;
+          // Effective distance incorporates noise so the cluster isn't perfectly round
+          if (dist + hex.noise < 55) {
+            isNearCursor = true;
           }
         }
         
-        if (hex.currentOpacity < target) {
-          hex.currentOpacity = Math.min(target, hex.currentOpacity + fadeInSpeed);
-        } else if (hex.currentOpacity > target) {
-          hex.currentOpacity = Math.max(target, hex.currentOpacity - fadeOutSpeed);
+        if (isNearCursor) {
+          hex.opacity = Math.min(1, hex.opacity + dt * hex.fadeInSpeed);
+          hex.scale = Math.min(1, hex.scale + dt * (0.1 * hex.fadeInSpeed));
+          hex.timeSinceInactive = 0;
+        } else {
+          hex.timeSinceInactive += dt * 1000;
+          if (hex.timeSinceInactive > hex.delayOut) {
+            hex.opacity = Math.max(0, hex.opacity - dt * hex.fadeSpeed);
+            hex.scale = Math.max(0.9, hex.scale - dt * (0.1 * hex.fadeSpeed));
+          }
         }
         
-        if (hex.currentOpacity > 0.01) {
-          ctx.fillStyle = `rgba(${hex.r}, ${hex.g}, ${hex.b}, ${hex.currentOpacity.toFixed(3)})`;
-          ctx.fill(hex.path);
+        if (hex.opacity > 0.01) {
+          ctx.save();
+          ctx.translate(hex.x, hex.y);
+          ctx.scale(hex.scale, hex.scale);
+          ctx.globalAlpha = hex.opacity;
+          ctx.fillStyle = hex.color;
+          ctx.fill(hexPath);
+          ctx.restore();
         }
       }
       
       animationFrameId = requestAnimationFrame(render);
     };
 
-    render();
+    animationFrameId = requestAnimationFrame(render);
 
     return () => {
       window.removeEventListener('resize', resize);
