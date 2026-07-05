@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Modal from './Modal';
+import AnimatedButton from '../ui/AnimatedButton';
 
 export default function JoinServerModal({ isOpen, onClose, onJoin }) {
   const [inviteCode, setInviteCode] = useState('');
@@ -24,34 +25,35 @@ export default function JoinServerModal({ isOpen, onClose, onJoin }) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-2xl font-bold text-white mb-4">Join Server</h2>
+      <h2 className="text-2xl font-bold font-pixel text-vyre-text mb-4">Join Server</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Invite Code</label>
+          <label className="block text-xs font-pixel uppercase tracking-widest text-vyre-muted mb-2">Invite Code</label>
           <input
             type="text"
-            className="input-modern w-full"
+            className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
             placeholder="Enter invite code"
             value={inviteCode}
             onChange={(e) => setInviteCode(e.target.value)}
             required
           />
-          {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
+          {error && <p className="text-red-400 text-xs mt-2 font-pixel uppercase tracking-widest">{error}</p>}
         </div>
-        <div className="flex justify-end space-x-3 pt-2">
-          <button type="button" onClick={onClose} className="btn-secondary">
+        <div className="flex justify-end space-x-3 pt-4 border-t border-vyre-border mt-6">
+          <AnimatedButton variant="ghost" onClick={onClose} className="px-4 py-2">
             Cancel
-          </button>
-          <button
+          </AnimatedButton>
+          <AnimatedButton
             type="submit"
-            className="btn-primary flex items-center space-x-2"
+            variant="primary"
+            className="px-6 py-2"
             disabled={!inviteCode.trim() || loading}
           >
             {loading ? (
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+              <span className="inline-block w-4 h-4 border-2 border-vyre-bg border-t-transparent rounded-full animate-spin mr-2"></span>
             ) : null}
             {loading ? 'Joining...' : 'Join'}
-          </button>
+          </AnimatedButton>
         </div>
       </form>
     </Modal>

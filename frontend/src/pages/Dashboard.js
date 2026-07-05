@@ -10,10 +10,8 @@ import DirectMessages from '../components/DirectMessages';
 import ProfileModal from '../components/ProfileModal';
 import CreateServerModal from '../components/CreateServerModal';
 import { MessageSquare, Menu, Users, X } from 'lucide-react';
-import SpatialBackground from '../components/layout/SpatialBackground';
-import GlassPanel from '../components/ui/GlassPanel';
-
-import { useCursorGlow } from '../hooks/useCursorGlow';
+import PixelBackground from '../components/layout/PixelBackground';
+import PixelPanel from '../components/ui/PixelPanel';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -279,40 +277,31 @@ export default function Dashboard() {
   const onlineCount = members.filter(m => m.online).length;
   const friendsOnline = friends.filter(f => f.online).length;
 
-  const cursor = useCursorGlow();
-
   return (
-    <div className="flex h-screen bg-transparent overflow-hidden relative selection:bg-blue-500/30">
-      <SpatialBackground />
+    <div className="flex h-screen bg-vyre-bg overflow-hidden relative">
+      <PixelBackground />
       
-      {/* Custom Cursor Glow */}
-      <div 
-        className="pointer-events-none fixed inset-0 z-50 transition-opacity duration-300 hidden md:block"
-        style={{
-          background: `radial-gradient(600px circle at ${cursor.x}px ${cursor.y}px, rgba(255,255,255,0.06), transparent 40%)`
-        }}
-      />
       {/* Mobile Header (visible only on small screens) */}
-      <div className="lg:hidden flex items-center justify-between p-3 bg-gray-900 border-b border-gray-800 absolute top-0 w-full z-30">
+      <div className="lg:hidden flex items-center justify-between p-3 bg-vyre-card border-b border-vyre-border absolute top-0 w-full z-30">
         <button 
           onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-          className="p-2 text-gray-300 hover:text-white bg-gray-800 rounded-lg"
+          className="p-2 text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
         >
           {showLeftSidebar ? <X size={20} /> : <Menu size={20} />}
         </button>
-        <div className="font-bold text-lg bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+        <div className="font-bold font-pixel text-lg text-vyre-accent">
           {selectedServer ? selectedServer.name : (selectedFriend ? 'Direct Message' : 'Vyre')}
         </div>
         <button 
           onClick={() => setShowRightSidebar(!showRightSidebar)}
-          className="p-2 text-gray-300 hover:text-white bg-gray-800 rounded-lg"
+          className="p-2 text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
         >
           {showRightSidebar ? <X size={20} /> : <Users size={20} />}
         </button>
       </div>
 
       {/* Main Container for all content */}
-      <div className="flex flex-1 w-full h-full pt-[60px] lg:pt-0 p-0 lg:p-4 gap-4 z-10">
+      <div className="flex flex-1 w-full h-full pt-[60px] lg:pt-0 p-0 lg:p-4 gap-4 z-10 max-w-[1920px] mx-auto">
         
         {/* Left Sidebars Wrapper */}
         <div className={`
@@ -365,15 +354,15 @@ export default function Dashboard() {
         )}
         
         {/* Main Content Area */}
-        <GlassPanel blur="xl" className="flex-1 flex flex-col w-full h-full">
+        <PixelPanel className="flex-1 flex flex-col w-full h-full rounded-2xl shadow-lg border border-vyre-border">
         {!selectedServer && !selectedFriend ? (
           // Home page when no server and no friend selected
           <div className="flex flex-1 items-center justify-center px-4">
             <div className="text-center">
-              <h1 className="text-7xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-wide leading-normal pb-4">
-                Vyre
+              <h1 className="text-7xl font-pixel font-bold text-vyre-accent tracking-wide leading-normal pb-4">
+                VYRE
               </h1>
-              <p className="text-gray-400 mt-0 text-base tracking-wider">Connect. Chat. Collaborate.</p>
+              <p className="text-vyre-muted mt-0 text-xs font-pixel tracking-[0.2em] uppercase">Connect. Chat. Collaborate.</p>
             </div>
           </div>
         ) : !selectedServer && selectedFriend ? (
@@ -406,7 +395,7 @@ export default function Dashboard() {
             Select a channel to start chatting
           </div>
         )}
-        </GlassPanel>
+        </PixelPanel>
 
       {/* Right Overlay */}
       {showRightSidebar && (
@@ -417,11 +406,11 @@ export default function Dashboard() {
       )}
 
       {/* Right sidebar */}
-      <GlassPanel 
-        blur="lg"
+      <PixelPanel 
         className={`
           absolute lg:relative right-0 z-40 h-full w-72 flex flex-col overflow-y-auto transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
           ${showRightSidebar ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+          rounded-2xl border-vyre-border shadow-lg
         `}
       >
         <div className="p-4 flex flex-col h-full">
@@ -429,17 +418,17 @@ export default function Dashboard() {
 
           // ----- HOME PAGE: Friends + Pending Requests -----
           <>
-            <div className="mb-2">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+            <div className="mb-3">
+              <h3 className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest">
                 Friends — {friends.length} ({friendsOnline} online)
               </h3>
             </div>
             <div className="space-y-1 mb-4 flex-1 overflow-y-auto">
               {friends.map(f => (
-                <div key={f.friend_id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-700/50 transition-all duration-200 group cursor-pointer border border-transparent hover:border-gray-600/50">
+                <div key={f.friend_id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group cursor-pointer border border-transparent hover:border-vyre-border">
                   <div className="flex items-center space-x-3">
-                    <span className={`w-2.5 h-2.5 rounded-full shadow-sm ${f.online ? 'bg-green-500 shadow-green-500/50' : 'bg-gray-500'}`}></span>
-                    <span className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors">{f.display_name || f.username}</span>
+                    <span className={`w-2 h-2 rounded-[2px] shadow-sm ${f.online ? 'bg-vyre-accent' : 'bg-vyre-border'}`}></span>
+                    <span className="text-sm font-medium text-vyre-text group-hover:text-white transition-colors">{f.display_name || f.username}</span>
                   </div>
                   <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     {f.online && (
@@ -497,27 +486,27 @@ export default function Dashboard() {
         ) : (
           // ----- INSIDE A SERVER: Show Server Members -----
           <>
-            <div className="mb-2">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+            <div className="mb-3">
+              <h3 className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest">
                 Members — {members.length} ({onlineCount} online)
               </h3>
             </div>
-            <div className="space-y-2 overflow-y-auto flex-1">
+            <div className="space-y-1 overflow-y-auto flex-1">
               {members.map(m => (
-                <div key={m.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-800/60 transition group">
+                <div key={m.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-vyre-secondary transition group">
                   <div className="flex items-center space-x-3">
                     <div className="relative">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-sm font-bold shadow-md overflow-hidden">
+                      <div className="w-8 h-8 rounded-xl bg-vyre-secondary flex items-center justify-center text-sm font-pixel font-bold shadow-sm overflow-hidden text-vyre-muted">
                         {m.avatar ? (
                           <img src={m.avatar} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         ) : (
                           <span>{(m.display_name || m.username)[0].toUpperCase()}</span>
                         )}
                       </div>
-                      <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-900 ${m.online ? 'bg-green-500' : 'bg-gray-500'}`}></span>
+                      <span className={`absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-[2px] border-2 border-vyre-card ${m.online ? 'bg-vyre-accent' : 'bg-vyre-border'}`}></span>
                     </div>
                     <div>
-                      <div className="text-sm font-medium">{m.display_name || m.username}</div>
+                      <div className="text-sm font-medium text-vyre-text">{m.display_name || m.username}</div>
                       {m.status && <div className="text-xs text-gray-400">{m.status}</div>}
                     </div>
                   </div>
@@ -537,32 +526,32 @@ export default function Dashboard() {
         )}
 
         {/* Profile & Logout (always visible at bottom) */}
-        <div className="mt-4 border-t border-gray-700 pt-4 flex-shrink-0">
+        <div className="mt-4 border-t border-vyre-border pt-4 flex-shrink-0">
           <div
             onClick={() => setShowProfileModal(true)}
-            className="flex items-center space-x-3 p-2 rounded-xl bg-gray-800/40 hover:bg-gray-700/60 cursor-pointer transition"
+            className="flex items-center space-x-3 p-2 rounded-xl bg-vyre-secondary hover:bg-vyre-border cursor-pointer transition-colors"
           >
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden shadow-lg relative">
-              <span className="font-bold text-lg absolute">{(currentUser?.display_name || currentUser?.username)?.[0]?.toUpperCase()}</span>
+            <div className="w-10 h-10 rounded-xl bg-vyre-accent flex items-center justify-center overflow-hidden shadow-sm relative text-vyre-bg">
+              <span className="font-bold text-lg absolute font-pixel">{(currentUser?.display_name || currentUser?.username)?.[0]?.toUpperCase()}</span>
               {currentUser?.avatar && (
                 <img src={currentUser.avatar} alt="avatar" className="w-full h-full object-cover relative z-10" referrerPolicy="no-referrer" onError={(e) => e.target.style.display = 'none'} />
               )}
             </div>
             <div className="flex-1">
-              <div className="font-semibold">{currentUser?.display_name || currentUser?.username}</div>
-              <div className="text-xs text-gray-400">{currentUser?.status || "Online"}</div>
+              <div className="font-medium text-vyre-text text-sm">{currentUser?.display_name || currentUser?.username}</div>
+              <div className="text-[11px] text-vyre-accent font-pixel tracking-wider uppercase mt-0.5">{currentUser?.status || "Online"}</div>
             </div>
-            <div className="text-gray-400 text-sm">✎</div>
+            <div className="text-vyre-muted text-sm font-pixel hover:text-vyre-text">✎</div>
           </div>
           <button
             onClick={logout}
-            className="mt-2 w-full py-2 rounded-lg bg-red-600/80 hover:bg-red-600 text-white font-medium transition-all shadow-md"
+            className="mt-3 w-full py-2 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-sm font-medium transition-all"
           >
             Logout
           </button>
         </div>
         </div>
-      </GlassPanel>
+      </PixelPanel>
 
       {showProfileModal && (
         <ProfileModal

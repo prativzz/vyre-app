@@ -1,7 +1,7 @@
 import { API_URL } from '../config';
 import { useState } from 'react';
 import CreateChannelModal from './CreateChannelModal';
-import GlassPanel from './ui/GlassPanel';
+import PixelPanel from './ui/PixelPanel';
 
 export default function ChannelList({
   channels,
@@ -20,7 +20,7 @@ export default function ChannelList({
   const [loading, setLoading] = useState({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [channelType, setChannelType] = useState('text');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null); // holds channelId to delete
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
   const copyInvite = () => {
     if (!inviteCode) return;
@@ -29,7 +29,6 @@ export default function ChannelList({
       .catch(() => alert('Failed to copy. Please copy manually: ' + inviteCode));
   };
 
-  // --- CREATE CHANNEL (opens modal) ---
   const openCreateModal = (type) => {
     setChannelType(type);
     setShowCreateModal(true);
@@ -55,7 +54,6 @@ export default function ChannelList({
     }
   };
 
-  // --- RENAME CHANNEL ---
   const handleRename = async (channelId, newName) => {
     if (!newName) return;
     try {
@@ -80,10 +78,7 @@ export default function ChannelList({
     }
   };
 
-  // --- DELETE CHANNEL (with confirmation modal) ---
-  const confirmDelete = (channelId) => {
-    setShowDeleteConfirm(channelId);
-  };
+  const confirmDelete = (channelId) => setShowDeleteConfirm(channelId);
 
   const handleDelete = async () => {
     const channelId = showDeleteConfirm;
@@ -96,15 +91,11 @@ export default function ChannelList({
       });
       const data = await res.json();
       if (res.ok) {
-        if (selectedChannel?.id === channelId) {
-          onSelectChannel(null);
-        }
+        if (selectedChannel?.id === channelId) onSelectChannel(null);
         await fetchChannels(serverId);
       } else {
         alert(data.error || 'Failed to delete channel');
-        if (res.status === 404) {
-          await fetchChannels(serverId);
-        }
+        if (res.status === 404) await fetchChannels(serverId);
       }
     } catch (err) {
       console.error('Delete error:', err);
@@ -115,12 +106,8 @@ export default function ChannelList({
     }
   };
 
-  // --- DELETE SERVER ---
   const handleDeleteServer = async () => {
-    if (!window.confirm(`Are you absolutely sure you want to delete ${serverName || 'this server'}? This action cannot be undone.`)) {
-      return;
-    }
-    
+    if (!window.confirm(`Are you absolutely sure you want to delete ${serverName || 'this server'}? This action cannot be undone.`)) return;
     try {
       const res = await fetch(`${API_URL}/servers/${serverId}`, {
         method: 'DELETE',
@@ -147,21 +134,18 @@ export default function ChannelList({
         key={ch.id}
         className={`flex items-center justify-between px-2 py-1.5 rounded-lg cursor-pointer transition group ${
           selectedChannel?.id === ch.id
-            ? 'bg-gray-700 text-white'
-            : 'text-gray-300 hover:bg-gray-800/60'
+            ? 'bg-vyre-secondary text-vyre-text font-medium'
+            : 'text-vyre-muted hover:bg-vyre-secondary hover:text-vyre-text'
         }`}
       >
-        <div
-          className="flex items-center space-x-2 flex-1 min-w-0"
-          onClick={() => onSelectChannel(ch)}
-        >
-          <span className="text-gray-400">{ch.type === 'text' ? '#' : '🔊'}</span>
+        <div className="flex items-center space-x-2 flex-1 min-w-0" onClick={() => onSelectChannel(ch)}>
+          <span className="text-vyre-muted font-pixel text-xs">{ch.type === 'text' ? '#' : '🔊'}</span>
           {isEditing ? (
             <input
               type="text"
               defaultValue={ch.name}
               autoFocus
-              className="bg-gray-600 text-white rounded px-1 w-full"
+              className="bg-vyre-bg text-vyre-text rounded border border-vyre-border px-1 w-full text-sm outline-none focus:border-vyre-accent"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleRename(ch.id, e.target.value);
                 if (e.key === 'Escape') setEditingChannel(null);
@@ -175,27 +159,9 @@ export default function ChannelList({
         </div>
         <div className="flex items-center space-x-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition">
           {!isEditing && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setEditingChannel({ id: ch.id, name: ch.name });
-              }}
-              className="text-gray-400 hover:text-white text-xs"
-              disabled={isLoading}
-            >
-              ✏️
-            </button>
+            <button onClick={(e) => { e.stopPropagation(); setEditingChannel({ id: ch.id, name: ch.name }); }} className="text-vyre-muted hover:text-vyre-text text-xs" disabled={isLoading}>✏️</button>
           )}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              confirmDelete(ch.id);
-            }}
-            className="text-gray-400 hover:text-red-400 text-xs"
-            disabled={isLoading}
-          >
-            {isLoading ? '⏳' : '❌'}
-          </button>
+          <button onClick={(e) => { e.stopPropagation(); confirmDelete(ch.id); }} className="text-vyre-muted hover:text-red-400 text-xs" disabled={isLoading}>{isLoading ? '⏳' : '❌'}</button>
         </div>
       </div>
     );
@@ -205,95 +171,55 @@ export default function ChannelList({
   const voiceChannels = channels.filter(c => c.type === 'voice');
 
   return (
-    <GlassPanel blur="xl" className="w-64 my-4 ml-4 mr-2 flex-shrink-0 p-3 flex flex-col h-[calc(100%-2rem)]">
+    <PixelPanel className="w-64 my-4 ml-4 mr-2 flex-shrink-0 p-3 flex flex-col h-[calc(100%-2rem)]">
       <div className="flex items-center justify-between mb-4 px-2 flex-shrink-0">
-        <span className="text-sm font-bold text-white truncate mr-2">{serverName || 'Server'}</span>
+        <span className="text-sm font-bold text-vyre-text truncate mr-2 font-pixel">{serverName || 'Server'}</span>
         <div className="flex items-center space-x-2">
           {currentUserId === serverOwnerId && (
-            <button
-              onClick={handleDeleteServer}
-              className="text-xs text-red-500 hover:text-red-400 transition"
-              title="Delete Server"
-            >
-              🗑️
-            </button>
+            <button onClick={handleDeleteServer} className="text-xs text-red-400 hover:text-red-300 transition" title="Delete Server">🗑️</button>
           )}
           {inviteCode && (
-            <button
-              onClick={copyInvite}
-              className="text-xs text-gray-400 hover:text-white transition"
-              title="Copy invite code"
-            >
-              📋
-            </button>
+            <button onClick={copyInvite} className="text-xs text-vyre-muted hover:text-vyre-text transition" title="Copy invite code">📋</button>
           )}
         </div>
       </div>
 
       <div className="mb-4 flex-1 overflow-y-auto">
-        <div className="flex items-center justify-between px-2">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Text channels</h3>
-          <button
-            onClick={() => openCreateModal('text')}
-            className="text-gray-400 hover:text-white text-sm"
-            title="Create text channel"
-          >
-            +
-          </button>
+        <div className="flex items-center justify-between px-2 mb-2">
+          <h3 className="text-[10px] font-pixel text-vyre-muted uppercase tracking-widest">Text channels</h3>
+          <button onClick={() => openCreateModal('text')} className="text-vyre-muted hover:text-vyre-accent text-lg leading-none" title="Create text channel">+</button>
         </div>
-        <div className="mt-2 space-y-1">
+        <div className="mt-1 space-y-1">
           {textChannels.map(renderChannel)}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="flex items-center justify-between px-2">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Voice channels</h3>
-          <button
-            onClick={() => openCreateModal('voice')}
-            className="text-gray-400 hover:text-white text-sm"
-            title="Create voice channel"
-          >
-            +
-          </button>
+        <div className="flex items-center justify-between px-2 mb-2">
+          <h3 className="text-[10px] font-pixel text-vyre-muted uppercase tracking-widest">Voice channels</h3>
+          <button onClick={() => openCreateModal('voice')} className="text-vyre-muted hover:text-vyre-accent text-lg leading-none" title="Create voice channel">+</button>
         </div>
-        <div className="mt-2 space-y-1">
+        <div className="mt-1 space-y-1">
           {voiceChannels.map(renderChannel)}
         </div>
       </div>
 
-      {/* Create Channel Modal */}
       {showCreateModal && (
-        <CreateChannelModal
-          onClose={() => setShowCreateModal(false)}
-          onCreate={handleCreate}
-          type={channelType}
-        />
+        <CreateChannelModal onClose={() => setShowCreateModal(false)} onCreate={handleCreate} type={channelType} />
       )}
 
-      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]">
-          <div className="glass-card rounded-2xl p-6 w-96 max-w-[90vw]">
-            <h3 className="text-xl font-bold text-white mb-4">Delete Channel</h3>
-            <p className="text-gray-300 mb-6">Are you sure you want to delete this channel?</p>
+          <PixelPanel className="p-6 w-96 max-w-[90vw]">
+            <h3 className="text-xl font-bold text-vyre-text mb-4 font-pixel">Delete Channel</h3>
+            <p className="text-vyre-muted mb-6">Are you sure you want to delete this channel?</p>
             <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDeleteConfirm(null)}
-                className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold transition shadow-md"
-              >
-                Delete
-              </button>
+              <button onClick={() => setShowDeleteConfirm(null)} className="px-4 py-2 rounded-lg bg-vyre-secondary hover:bg-vyre-border text-vyre-text transition text-sm">Cancel</button>
+              <button onClick={handleDelete} className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-semibold transition text-sm">Delete</button>
             </div>
-          </div>
+          </PixelPanel>
         </div>
       )}
-    </GlassPanel>
+    </PixelPanel>
   );
 }

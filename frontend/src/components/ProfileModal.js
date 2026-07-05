@@ -1,6 +1,7 @@
 import { API_URL } from '../config';
 import { useState, useRef } from 'react';
 import Modal from './Modals/Modal';
+import AnimatedButton from './ui/AnimatedButton';
 
 export default function ProfileModal({ user, token, onClose, onUpdate }) {
   const [displayName, setDisplayName] = useState(user.display_name || user.username);
@@ -49,63 +50,67 @@ export default function ProfileModal({ user, token, onClose, onUpdate }) {
 
   return (
     <Modal isOpen={true} onClose={onClose}>
-      <h2 className="text-2xl font-bold mb-4 text-white">Edit Profile</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex flex-col items-center">
-            <div
-              className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center cursor-pointer overflow-hidden mb-2 relative group shadow-lg"
-              onClick={() => fileInputRef.current.click()}
-            >
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity duration-200 z-10">
-                <span className="text-xs font-bold uppercase tracking-wider">Change</span>
-              </div>
-              {avatarPreview ? (
-                <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover relative z-0" />
-              ) : (
-                <span className="text-3xl font-bold relative z-0">{user.username[0].toUpperCase()}</span>
-              )}
+      <h2 className="text-2xl font-bold mb-4 font-pixel text-vyre-text">Edit Profile</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex flex-col items-center mb-6">
+          <div
+            className="w-24 h-24 rounded-[20px] bg-vyre-secondary flex items-center justify-center cursor-pointer overflow-hidden mb-3 relative group shadow-lg border border-vyre-border transition-colors hover:border-vyre-accent text-vyre-muted font-pixel"
+            onClick={() => fileInputRef.current.click()}
+          >
+            <div className="absolute inset-0 bg-vyre-card/80 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-vyre-text transition-opacity duration-200 z-10 backdrop-blur-sm">
+              <span className="text-[10px] font-bold uppercase tracking-widest">Change</span>
             </div>
-            {avatarPreview && (
-              <button
-                type="button"
-                onClick={handleRemoveAvatar}
-                className="text-xs text-red-400 hover:text-red-300 transition-colors font-medium"
-              >
-                Remove Avatar
-              </button>
+            {avatarPreview ? (
+              <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover relative z-0" />
+            ) : (
+              <span className="text-3xl font-bold relative z-0">{user.username[0].toUpperCase()}</span>
             )}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleAvatarChange}
-              accept="image/*"
-              className="hidden"
-            />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Display Name</label>
-            <input
-              type="text"
-              className="input-modern w-full"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Status</label>
-            <input
-              type="text"
-              className="input-modern w-full"
-              placeholder="e.g., Gaming, Studying, AFK"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            />
-          </div>
-          <div className="flex justify-end space-x-3 mt-6">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-colors border border-white/10 backdrop-blur-sm">Cancel</button>
-            <button type="submit" className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-colors shadow-[0_2px_10px_rgba(37,99,235,0.3)]">Save</button>
-          </div>
-        </form>
+          {avatarPreview && (
+            <button
+              type="button"
+              onClick={handleRemoveAvatar}
+              className="text-xs text-red-400 hover:text-red-300 transition-colors font-pixel uppercase tracking-widest"
+            >
+              Remove Avatar
+            </button>
+          )}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleAvatarChange}
+            accept="image/*"
+            className="hidden"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-pixel uppercase tracking-widest text-vyre-muted mb-2">Display Name</label>
+          <input
+            type="text"
+            className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-pixel uppercase tracking-widest text-vyre-muted mb-2">Status</label>
+          <input
+            type="text"
+            className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
+            placeholder="e.g., Gaming, Studying, AFK"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          />
+        </div>
+        <div className="flex justify-end space-x-3 pt-4 border-t border-vyre-border mt-6">
+          <AnimatedButton variant="ghost" onClick={onClose} className="px-4 py-2">
+            Cancel
+          </AnimatedButton>
+          <AnimatedButton type="submit" variant="primary" className="px-6 py-2">
+            Save
+          </AnimatedButton>
+        </div>
+      </form>
     </Modal>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Modal from './Modal';
+import AnimatedButton from '../ui/AnimatedButton';
 
 export default function CreateServerModal({ isOpen, onClose, onCreate }) {
   const [name, setName] = useState('');
@@ -21,26 +22,26 @@ export default function CreateServerModal({ isOpen, onClose, onCreate }) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-2xl font-bold text-white mb-4">Create Server</h2>
+      <h2 className="text-2xl font-bold font-pixel text-vyre-text mb-4">Create Server</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Server Name</label>
+          <label className="block text-xs font-pixel uppercase tracking-widest text-vyre-muted mb-2">Server Name</label>
           <input
             type="text"
-            className="input-modern w-full"
+            className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
             placeholder="Enter server name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={maxLength}
             required
           />
-          <p className="text-xs text-gray-400 text-right mt-1">{name.length}/{maxLength}</p>
+          <p className="text-[10px] text-vyre-muted text-right mt-1 font-pixel">{name.length}/{maxLength}</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Description (optional)</label>
+          <label className="block text-xs font-pixel uppercase tracking-widest text-vyre-muted mb-2">Description (optional)</label>
           <textarea
-            className="input-modern w-full"
+            className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm resize-none"
             placeholder="What's this server about?"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -48,20 +49,21 @@ export default function CreateServerModal({ isOpen, onClose, onCreate }) {
           />
         </div>
 
-        <div className="flex justify-end space-x-3 pt-2">
-          <button type="button" onClick={onClose} className="btn-secondary">
+        <div className="flex justify-end space-x-3 pt-4 border-t border-vyre-border mt-6">
+          <AnimatedButton variant="ghost" onClick={onClose} className="px-4 py-2">
             Cancel
-          </button>
-          <button
+          </AnimatedButton>
+          <AnimatedButton
             type="submit"
-            className="btn-primary flex items-center space-x-2"
+            variant="primary"
+            className="px-6 py-2"
             disabled={!name.trim() || loading}
           >
             {loading ? (
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+              <span className="inline-block w-4 h-4 border-2 border-vyre-bg border-t-transparent rounded-full animate-spin mr-2"></span>
             ) : null}
             {loading ? 'Creating...' : 'Create'}
-          </button>
+          </AnimatedButton>
         </div>
       </form>
     </Modal>

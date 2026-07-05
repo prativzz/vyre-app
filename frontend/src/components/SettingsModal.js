@@ -2,6 +2,7 @@ import { API_URL } from '../config';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Modal from './Modals/Modal';
+import AnimatedButton from './ui/AnimatedButton';
 
 export default function SettingsModal({ isOpen, onClose }) {
   const { token, logout } = useAuth();
@@ -65,61 +66,73 @@ export default function SettingsModal({ isOpen, onClose }) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-2xl font-bold text-white mb-4">Settings</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold font-pixel text-vyre-text">Settings</h2>
+      </div>
+
       {message.text && (
-        <div className={`p-2 rounded mb-3 text-sm ${message.type === 'success' ? 'bg-green-600/30 text-green-200' : 'bg-red-600/30 text-red-200'}`}>
+        <div className={`p-3 rounded-lg mb-4 text-xs font-pixel uppercase tracking-widest border ${message.type === 'success' ? 'bg-vyre-accent/10 text-vyre-accent border-vyre-accent/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
           {message.text}
         </div>
       )}
-      <form onSubmit={handleChangePassword} className="space-y-3 mb-4">
-        <h3 className="text-sm font-semibold text-gray-300">Change Password</h3>
-        <input
-          type="password"
-          placeholder="Current password"
-          className="input-modern w-full"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          required
-          disabled={loading}
-        />
-        <input
-          type="password"
-          placeholder="New password"
-          className="input-modern w-full"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          required
-          disabled={loading}
-        />
-        <input
-          type="password"
-          placeholder="Confirm new password"
-          className="input-modern w-full"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          disabled={loading}
-        />
-        <button type="submit" className="btn-primary w-full" disabled={loading}>
+
+      <form onSubmit={handleChangePassword} className="space-y-4 mb-8">
+        <div>
+          <h3 className="text-xs font-pixel uppercase tracking-widest text-vyre-muted mb-3 pb-2 border-b border-vyre-border">Change Password</h3>
+          <div className="space-y-3">
+            <input
+              type="password"
+              placeholder="Current password"
+              className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+            <input
+              type="password"
+              placeholder="New password"
+              className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+            <input
+              type="password"
+              placeholder="Confirm new password"
+              className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </div>
+        </div>
+        <AnimatedButton type="submit" variant="primary" className="w-full py-3" disabled={loading}>
           {loading ? 'Updating...' : 'Update Password'}
-        </button>
+        </AnimatedButton>
       </form>
 
-      <button
-        onClick={() => { logout(); onClose(); window.location.href = '/login'; }}
-        className="btn-secondary w-full mb-3"
-        disabled={loading}
-      >
-        Logout
-      </button>
-
-      <button
-        onClick={handleDeleteAccount}
-        className="w-full py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium transition"
-        disabled={loading}
-      >
-        {loading ? 'Processing...' : 'Delete Account'}
-      </button>
+      <div className="space-y-3 pt-4 border-t border-vyre-border">
+        <h3 className="text-xs font-pixel uppercase tracking-widest text-vyre-muted mb-3">Account Actions</h3>
+        <AnimatedButton
+          onClick={() => { logout(); onClose(); window.location.href = '/login'; }}
+          variant="secondary"
+          className="w-full py-3"
+          disabled={loading}
+        >
+          Logout
+        </AnimatedButton>
+        <AnimatedButton
+          onClick={handleDeleteAccount}
+          variant="danger"
+          className="w-full py-3"
+          disabled={loading}
+        >
+          {loading ? 'Processing...' : 'Delete Account'}
+        </AnimatedButton>
+      </div>
     </Modal>
   );
 }

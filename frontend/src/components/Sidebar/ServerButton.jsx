@@ -5,29 +5,21 @@ export default function ServerButton({ server, isActive, onClick }) {
 
   return (
     <motion.button
-      whileHover={{ scale: 1.15, rotate: 2 }}
-      whileTap={{ scale: 0.9 }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className={`relative w-12 h-12 mb-3 flex-shrink-0 rounded-[18px] flex items-center justify-center text-white font-bold text-lg transition-colors focus:outline-none overflow-hidden group ${
+      className={`relative w-12 h-12 mb-3 flex-shrink-0 rounded-[12px] flex items-center justify-center font-pixel font-bold text-lg transition-all focus:outline-none overflow-hidden group border ${
         isActive
-          ? 'bg-blue-600 shadow-[0_4px_20px_rgba(37,99,235,0.5),inset_0_1px_1px_rgba(255,255,255,0.4)]'
-          : 'bg-white/5 hover:bg-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
+          ? 'bg-vyre-accent text-vyre-bg border-vyre-accent shadow-[0_0_12px_rgba(16,185,129,0.4)]'
+          : 'bg-vyre-secondary text-vyre-text border-vyre-border hover:border-vyre-muted'
       }`}
     >
       <span className="relative z-10">{initial}</span>
       
-      {/* Liquid morph animation on active */}
+      {/* Tiny pixel highlight on active */}
       {isActive && (
-        <motion.div 
-          layoutId="activeServer"
-          className="absolute inset-0 bg-gradient-to-tr from-blue-400 to-indigo-500 opacity-80"
-          initial={false}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        />
+        <span className="absolute top-1 left-1 w-1 h-1 bg-white opacity-50 rounded-[1px]" />
       )}
-      
-      {/* Sweeping chrome reflection on hover */}
-      <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent z-20 pointer-events-none" />
     </motion.button>
   );
 }

@@ -2,6 +2,7 @@ import { API_URL } from '../../config';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Modal from './Modal';
+import AnimatedButton from '../ui/AnimatedButton';
 
 export default function AddFriendModal({ isOpen, onClose, friends, pendingRequests, onRefresh }) {
   const { token } = useAuth();
@@ -83,14 +84,14 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-2xl font-bold text-white mb-1">Add Friend</h2>
-      <p className="text-sm text-gray-400 mb-4">Search by username or display name.</p>
+      <h2 className="text-2xl font-bold font-pixel text-vyre-text mb-2">Add Friend</h2>
+      <p className="text-xs text-vyre-muted mb-4 font-pixel tracking-widest uppercase">Search by username or display name.</p>
 
       {/* Search input – no icon */}
       <input
         ref={inputRef}
         type="text"
-        className="input-modern w-full"
+        className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
         placeholder="Search for users..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
@@ -99,9 +100,9 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
 
       {/* Results list */}
       {searchQuery.trim() && (
-        <div className="mt-3 max-h-48 overflow-y-auto space-y-1 bg-gray-700/30 rounded-lg p-1">
+        <div className="mt-3 max-h-48 overflow-y-auto space-y-1 bg-vyre-bg rounded-lg p-1 border border-vyre-border">
           {loading ? (
-            <div className="text-center text-gray-400 py-2">Loading users...</div>
+            <div className="text-center text-vyre-muted py-2 text-xs font-pixel uppercase tracking-widest">Loading users...</div>
           ) : results.length > 0 ? (
             results.map((user) => {
               const status = getStatus(user.id);
@@ -110,8 +111,8 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
                   key={user.id}
                   className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition ${
                     selectedUser?.id === user.id
-                      ? 'bg-blue-600/40 border border-blue-500'
-                      : 'hover:bg-gray-700/60'
+                      ? 'bg-vyre-secondary border-vyre-accent border'
+                      : 'hover:bg-vyre-secondary border-transparent border'
                   }`}
                   onClick={() => {
                     if (status) return; // can't select friend or pending
@@ -119,49 +120,50 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
                   }}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-8 h-8 rounded-[8px] bg-vyre-secondary flex items-center justify-center text-vyre-muted font-bold font-pixel text-xs border border-vyre-border">
                       {(user.display_name || user.username)[0].toUpperCase()}
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-white">
+                      <div className="text-sm font-medium text-vyre-text">
                         {user.display_name || user.username}
                       </div>
-                      <div className="text-xs text-gray-400">@{user.username}</div>
+                      <div className="text-[10px] text-vyre-muted font-pixel tracking-wider uppercase">@{user.username}</div>
                     </div>
                   </div>
                   {status === 'friend' && (
-                    <span className="text-xs text-gray-400">✓ Friend</span>
+                    <span className="text-xs text-vyre-muted font-pixel uppercase">✓ Friend</span>
                   )}
                   {status === 'pending' && (
-                    <span className="text-xs text-yellow-400">Pending</span>
+                    <span className="text-xs text-vyre-accent font-pixel uppercase">Pending</span>
                   )}
                   {!status && selectedUser?.id === user.id && (
-                    <span className="text-blue-400 text-sm">✓ Selected</span>
+                    <span className="text-vyre-accent text-sm font-pixel">✓ Selected</span>
                   )}
                 </div>
               );
             })
           ) : (
-            <div className="text-center text-gray-400 py-2">No users found</div>
+            <div className="text-center text-vyre-muted py-2 text-xs font-pixel uppercase tracking-widest">No users found</div>
           )}
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex justify-end space-x-3 mt-4 pt-2 border-t border-gray-700/50">
-        <button onClick={onClose} className="btn-secondary">
+      <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-vyre-border">
+        <AnimatedButton variant="ghost" onClick={onClose} className="px-4 py-2">
           Cancel
-        </button>
-        <button
+        </AnimatedButton>
+        <AnimatedButton
+          variant="primary"
           onClick={handleSendRequest}
-          className="btn-primary flex items-center space-x-2"
+          className="px-4 py-2"
           disabled={!selectedUser || sending}
         >
           {sending ? (
-            <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+            <span className="inline-block w-4 h-4 border-2 border-vyre-bg border-t-transparent rounded-full animate-spin mr-2"></span>
           ) : null}
           {sending ? 'Sending...' : 'Send Friend Request'}
-        </button>
+        </AnimatedButton>
       </div>
     </Modal>
   );
