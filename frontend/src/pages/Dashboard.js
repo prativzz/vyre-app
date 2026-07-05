@@ -319,6 +319,10 @@ export default function Dashboard() {
         friends={friends}
         pendingRequests={pendingRequests}
         onRefresh={refreshAll}
+        onHome={() => {
+          setSelectedServer(null);
+          setSelectedFriend(null);
+        }}
       />
 
       {selectedServer && (

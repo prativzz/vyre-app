@@ -17,6 +17,7 @@ export default function Sidebar({
   friends,
   pendingRequests,
   onRefresh,
+  onHome,
 }) {
   const [activeNav, setActiveNav] = useState('home');
   const [showAddFriend, setShowAddFriend] = useState(false);
@@ -27,7 +28,8 @@ export default function Sidebar({
   const handleNavigate = (id) => {
     setActiveNav(id);
     if (id === 'home') {
-      onSelectServer(null);
+      if (onHome) onHome();
+      else onSelectServer(null);
     } else if (id === 'settings') {
       setShowSettings(true);
     }
