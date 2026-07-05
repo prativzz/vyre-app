@@ -1,5 +1,6 @@
 import { API_URL } from '../config';
 import { useState } from 'react';
+import { Pencil, Trash2, Copy, Loader2 } from 'lucide-react';
 import CreateChannelModal from './CreateChannelModal';
 import PixelPanel from './ui/PixelPanel';
 
@@ -159,9 +160,23 @@ export default function ChannelList({
         </div>
         <div className="flex items-center space-x-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition">
           {!isEditing && (
-            <button onClick={(e) => { e.stopPropagation(); setEditingChannel({ id: ch.id, name: ch.name }); }} className="text-vyre-muted hover:text-vyre-text text-xs" disabled={isLoading}>✏️</button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); setEditingChannel({ id: ch.id, name: ch.name }); }} 
+              className="p-1.5 rounded text-vyre-muted hover:text-vyre-accent hover:bg-vyre-accent/10 transition-colors" 
+              disabled={isLoading}
+              title="Edit Channel"
+            >
+              <Pencil size={13} />
+            </button>
           )}
-          <button onClick={(e) => { e.stopPropagation(); confirmDelete(ch.id); }} className="text-vyre-muted hover:text-red-400 text-xs" disabled={isLoading}>{isLoading ? '⏳' : '❌'}</button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); confirmDelete(ch.id); }} 
+            className="p-1.5 rounded text-vyre-muted hover:text-red-400 hover:bg-red-500/10 transition-colors" 
+            disabled={isLoading}
+            title="Delete Channel"
+          >
+            {isLoading ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+          </button>
         </div>
       </div>
     );
@@ -174,12 +189,24 @@ export default function ChannelList({
     <PixelPanel className="w-64 flex-shrink-0 p-3 flex flex-col h-full">
       <div className="flex items-center justify-between mb-4 px-2 flex-shrink-0">
         <span className="text-sm font-bold text-vyre-text truncate mr-2 font-pixel">{serverName || 'Server'}</span>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
           {currentUserId === serverOwnerId && (
-            <button onClick={handleDeleteServer} className="text-xs text-red-400 hover:text-red-300 transition" title="Delete Server">🗑️</button>
+            <button 
+              onClick={handleDeleteServer} 
+              className="p-1.5 rounded text-vyre-muted hover:text-red-400 hover:bg-red-500/10 transition-colors" 
+              title="Delete Server"
+            >
+              <Trash2 size={14} />
+            </button>
           )}
           {inviteCode && (
-            <button onClick={copyInvite} className="text-xs text-vyre-muted hover:text-vyre-text transition" title="Copy invite code">📋</button>
+            <button 
+              onClick={copyInvite} 
+              className="p-1.5 rounded text-vyre-muted hover:text-vyre-accent hover:bg-vyre-accent/10 transition-colors" 
+              title="Copy invite code"
+            >
+              <Copy size={14} />
+            </button>
           )}
         </div>
       </div>
