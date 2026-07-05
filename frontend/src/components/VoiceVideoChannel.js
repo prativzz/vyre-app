@@ -3,14 +3,186 @@ import { useEffect, useState } from 'react';
 import {
   LiveKitRoom,
   LayoutContextProvider,
-  ControlBar,
   ParticipantTile,
   useParticipants,
-  useIsSpeaking
+  useIsSpeaking,
+  useLocalParticipant
 } from '@livekit/components-react';
 import { Track, ParticipantEvent } from 'livekit-client';
 import '@livekit/components-styles';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Mic, MicOff, Video, VideoOff, MonitorUp, PhoneOff, CameraOff } from 'lucide-react';
+import PixelBackground from './layout/PixelBackground';
+
+// Custom pixel spark particle component for button hovers
+function PixelSparkles({ active }) {
+  const [sparks, setSparks] = useState([]);
+  
+  useEffect(() => {
+    if (!active) return;
+    
+    // Spawn 2-4 tiny sparks
+    const count = Math.floor(Math.random() * 3) + 2;
+    const newSparks = Array.from({ length: count }).map((_, i) => ({
+      id: Date.now() + i,
+      x: (Math.random() - 0.5) * 20, // -10px to +10px from center
+      delay: Math.random() * 0.2
+    }));
+    
+    setSparks(newSparks);
+    
+    const timeout = setTimeout(() => {
+      setSparks([]);
+    }, 800);
+    
+    return () => clearTimeout(timeout);
+  }, [active]);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-visible z-50">
+      <AnimatePresence>
+        {sparks.map(spark => (
+          <motion.div
+            key={spark.id}
+            initial={{ opacity: 0, y: 0, x: spark.x }}
+            animate={{ opacity: [0, 1, 0], y: -20 - Math.random() * 15, x: spark.x + (Math.random() - 0.5) * 10 }}
+            transition={{ duration: 0.5, delay: spark.delay, ease: "easeOut" }}
+            className="absolute top-0 left-1/2 w-1 h-1 bg-vyre-accent rounded-sm shadow-[0_0_2px_#20C997]"
+          />
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Custom Control Button
+function ControlButton({ icon: Icon, label, active, danger, onClick }) {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  return (
+    <div 
+      className="relative flex flex-col items-center justify-center group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <motion.button
+        whileHover={{ scale: 1.03, y: -3 }}
+        whileTap={{ scale: 0.97 }}
+        onClick={onClick}
+        className={`relative w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-colors border ${
+          danger 
+            ? 'bg-[#2A1515] border-[#3A1D1D] hover:bg-[#321919] hover:border-[#4A2525] text-red-400 hover:shadow-[0_4px_16px_rgba(239,68,68,0.15)]'
+            : active 
+              ? 'bg-[#181B1F] border-vyre-accent/30 text-vyre-accent hover:bg-[#1A1F24] hover:border-vyre-accent/50'
+              : 'bg-[#23272E] border-white/5 text-[#A5ABB3] hover:bg-[#2D323A] hover:border-vyre-accent/40 hover:text-white'
+        }`}
+      >
+        <div className="absolute inset-0 rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none" />
+        
+        <Icon size={22} className={`transition-transform duration-300 ${isHovered && !danger ? 'scale-110' : ''}`} />
+        
+        {/* Active Breathing Badge */}
+        {active && !danger && (
+          <motion.div 
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-3 right-3 w-1.5 h-1.5 bg-vyre-accent rounded-sm shadow-[0_0_4px_#20C997]"
+          />
+        )}
+      </motion.button>
+      <PixelSparkles active={isHovered && !danger} />
+    </div>
+  );
+}
+
+// Custom Control Dock matching the Linear/Raycast aesthetic
+function CustomDock({ onLeave }) {
+  const { localParticipant } = useLocalParticipant();
+  const [isMicEnabled, setIsMicEnabled] = useState(true);
+  const [isCamEnabled, setIsCamEnabled] = useState(true);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+
+  useEffect(() => {
+    if (!localParticipant) return;
+    setIsMicEnabled(localParticipant.isMicrophoneEnabled);
+    setIsCamEnabled(localParticipant.isCameraEnabled);
+    setIsScreenSharing(localParticipant.isScreenShareEnabled);
+
+    const updateState = () => {
+      setIsMicEnabled(localParticipant.isMicrophoneEnabled);
+      setIsCamEnabled(localParticipant.isCameraEnabled);
+      setIsScreenSharing(localParticipant.isScreenShareEnabled);
+    };
+
+    localParticipant.on(ParticipantEvent.LocalTrackPublished, updateState);
+    localParticipant.on(ParticipantEvent.LocalTrackUnpublished, updateState);
+    localParticipant.on(ParticipantEvent.TrackMuted, updateState);
+    localParticipant.on(ParticipantEvent.TrackUnmuted, updateState);
+
+    return () => {
+      localParticipant.off(ParticipantEvent.LocalTrackPublished, updateState);
+      localParticipant.off(ParticipantEvent.LocalTrackUnpublished, updateState);
+      localParticipant.off(ParticipantEvent.TrackMuted, updateState);
+      localParticipant.off(ParticipantEvent.TrackUnmuted, updateState);
+    };
+  }, [localParticipant]);
+
+  const toggleMic = async () => {
+    if (localParticipant) {
+      await localParticipant.setMicrophoneEnabled(!isMicEnabled);
+    }
+  };
+
+  const toggleCam = async () => {
+    if (localParticipant) {
+      await localParticipant.setCameraEnabled(!isCamEnabled);
+    }
+  };
+
+  const toggleScreen = async () => {
+    if (localParticipant) {
+      await localParticipant.setScreenShareEnabled(!isScreenSharing);
+    }
+  };
+
+  return (
+    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50">
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", damping: 20, stiffness: 200 }}
+        className="flex items-center gap-4 bg-[#181B1F]/90 backdrop-blur-xl p-3 rounded-[24px] border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+      >
+        <ControlButton 
+          icon={isMicEnabled ? Mic : MicOff} 
+          label="Microphone" 
+          active={isMicEnabled} 
+          onClick={toggleMic} 
+        />
+        <ControlButton 
+          icon={isCamEnabled ? Video : VideoOff} 
+          label="Camera" 
+          active={isCamEnabled} 
+          onClick={toggleCam} 
+        />
+        <div className="w-[1px] h-8 bg-white/5 mx-1" />
+        <ControlButton 
+          icon={MonitorUp} 
+          label="Screen Share" 
+          active={isScreenSharing} 
+          onClick={toggleScreen} 
+        />
+        <div className="w-[1px] h-8 bg-white/5 mx-1" />
+        <ControlButton 
+          icon={PhoneOff} 
+          label="Leave" 
+          danger 
+          onClick={onLeave} 
+        />
+      </motion.div>
+    </div>
+  );
+}
 
 function ParticipantWrapper({ participant }) {
   const [isMicMuted, setIsMicMuted] = useState(!participant.isMicrophoneEnabled);
@@ -18,7 +190,6 @@ function ParticipantWrapper({ participant }) {
   const [avatar, setAvatar] = useState(null);
 
   useEffect(() => {
-    // Fetch the user's avatar using their identity (which is their userId in our DB)
     fetch(`${API_URL}/user/${participant.identity}/profile`)
       .then(res => res.json())
       .then(data => {
@@ -32,10 +203,8 @@ function ParticipantWrapper({ participant }) {
       setIsMicMuted(!participant.isMicrophoneEnabled);
       setIsCamMuted(!participant.isCameraEnabled);
     };
-
     updateState();
 
-    // Listen for any track changes on this participant
     participant.on(ParticipantEvent.TrackMuted, updateState);
     participant.on(ParticipantEvent.TrackUnmuted, updateState);
     participant.on(ParticipantEvent.TrackPublished, updateState);
@@ -57,7 +226,6 @@ function ParticipantWrapper({ participant }) {
   const displayName = participant.name || 'Unknown';
   const initial = displayName.charAt(0).toUpperCase();
 
-  // Get the actual track publication so ParticipantTile can render the video stream
   const cameraPub = participant.getTrackPublication(Track.Source.Camera);
   const trackRef = {
     participant,
@@ -73,53 +241,100 @@ function ParticipantWrapper({ participant }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.2 }}
-      className={`relative rounded-2xl overflow-hidden h-full min-h-[200px] transition-all duration-300 ${
-        isSpeaking ? 'bg-vyre-card border-2 border-vyre-accent shadow-[0_0_12px_rgba(16,185,129,0.3)]' : 'bg-vyre-secondary border border-vyre-border'
-      }`}
+      transition={{ type: "spring", damping: 20, stiffness: 200 }}
+      className="relative rounded-3xl overflow-hidden h-full min-h-[250px] bg-[#181B1F] border border-white/5 shadow-[0_4px_24px_rgba(0,0,0,0.2)] group"
     >
-      <ParticipantTile trackRef={trackRef} className="w-full h-full [&>.lk-participant-placeholder]:opacity-0 relative z-0" />
+      <div className="absolute inset-0 rounded-3xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none z-30" />
+      
+      {/* Speaking Border Pulse */}
+      <AnimatePresence>
+        {isSpeaking && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 z-20 pointer-events-none rounded-3xl p-[2px]"
+            style={{
+              background: 'linear-gradient(90deg, rgba(32,201,151,0) 0%, rgba(32,201,151,0.5) 50%, rgba(32,201,151,0) 100%)',
+              backgroundSize: '200% 100%',
+              WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              WebkitMaskComposite: 'xor',
+              maskComposite: 'exclude',
+            }}
+          >
+            <motion.div 
+              animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+              className="w-full h-full rounded-3xl"
+              style={{
+                background: 'linear-gradient(90deg, rgba(32,201,151,0) 0%, rgba(32,201,151,0.8) 50%, rgba(32,201,151,0) 100%)',
+                backgroundSize: '200% 100%',
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <ParticipantTile trackRef={trackRef} className="w-full h-full [&>.lk-participant-placeholder]:opacity-0 relative z-0 object-cover" />
       
       {isCamMuted && (
-        <div className="absolute inset-0 flex items-center justify-center bg-vyre-bg/80 backdrop-blur-sm pointer-events-none z-10">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111315]/95 z-10 backdrop-blur-md">
           <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className={`w-24 h-24 rounded-[20px] flex items-center justify-center overflow-hidden border-2 bg-vyre-secondary shadow-sm ${isSpeaking ? 'border-vyre-accent' : 'border-vyre-border'}`}
+            initial={{ scale: 0.9, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ type: "spring", damping: 15, stiffness: 150 }}
+            className="relative"
           >
-            {avatar ? (
-              <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-4xl font-bold font-pixel text-vyre-muted">{initial}</span>
-            )}
+            <div className="w-28 h-28 rounded-full flex items-center justify-center overflow-hidden border border-white/10 bg-[#181B1F] shadow-2xl relative z-10">
+              {avatar ? (
+                <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-4xl font-bold font-pixel text-vyre-muted">{initial}</span>
+              )}
+            </div>
+            <div className="absolute -bottom-3 -right-3 w-10 h-10 bg-[#23272E] rounded-full border border-white/5 shadow-lg flex items-center justify-center z-20 text-vyre-muted">
+              <CameraOff size={18} />
+            </div>
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="mt-6 flex flex-col items-center"
+          >
+            <span className="font-pixel text-[11px] tracking-[0.2em] uppercase text-vyre-muted/60">Camera Disabled</span>
           </motion.div>
         </div>
       )}
       
-      <div className="absolute bottom-4 left-4 bg-vyre-card px-3 py-1.5 rounded-lg text-[10px] font-pixel uppercase tracking-widest text-vyre-text flex items-center gap-2 z-20 border border-vyre-border shadow-sm">
+      {/* Floating Username Chip */}
+      <div className="absolute bottom-4 left-4 bg-[#181B1F]/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-medium text-white/90 flex items-center gap-2 z-30 border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
+        <div className="w-1.5 h-1.5 bg-vyre-accent rounded-full shadow-[0_0_4px_rgba(32,201,151,0.5)]" />
         <span>{isLocal ? 'You' : displayName}</span>
       </div>
 
-      {isMicMuted && (
-        <div className="absolute top-4 right-4 bg-red-500/10 p-2 rounded-lg text-red-400 shadow-sm z-20 border border-red-500/20">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="1" y1="1" x2="23" y2="23"></line>
-            <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
-            <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
-            <line x1="12" y1="19" x2="12" y2="23"></line>
-            <line x1="8" y1="23" x2="16" y2="23"></line>
-          </svg>
-        </div>
-      )}
+      {/* Muted Pill */}
+      <AnimatePresence>
+        {isMicMuted && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="absolute top-4 right-4 bg-[#181B1F]/90 backdrop-blur-md p-2 rounded-xl text-red-400/90 shadow-[0_4px_12px_rgba(0,0,0,0.3)] z-30 border border-white/10"
+          >
+            <MicOff size={16} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
 function VideoGrid() {
   const participants = useParticipants();
-
-  // Dynamic columns based on participant count
   const count = participants.length;
+  
   let cols = 1;
   if (count === 1) cols = 1;
   else if (count <= 4) cols = 2;
@@ -134,17 +349,19 @@ function VideoGrid() {
   };
 
   return (
-    <div className={`grid ${colClasses[cols]} gap-4 p-4 h-full w-full max-w-[1600px] mx-auto`}>
-      <AnimatePresence>
-      {participants.map((p) => (
-        <ParticipantWrapper key={p.identity} participant={p} />
-      ))}
-      </AnimatePresence>
-      {participants.length === 0 && (
-        <div className="col-span-full flex flex-col items-center justify-center text-vyre-muted opacity-50 h-full">
-          <span className="font-pixel text-xs tracking-widest uppercase">Waiting for others to join...</span>
-        </div>
-      )}
+    <div className="absolute inset-0 flex items-center justify-center p-8 pb-32">
+      <div className={`grid ${colClasses[cols]} gap-6 h-full w-full max-w-[1800px] mx-auto`}>
+        <AnimatePresence mode="popLayout">
+          {participants.map((p) => (
+            <ParticipantWrapper key={p.identity} participant={p} />
+          ))}
+        </AnimatePresence>
+        {participants.length === 0 && (
+          <div className="col-span-full flex flex-col items-center justify-center text-vyre-muted opacity-50 h-full">
+            <span className="font-pixel text-[11px] tracking-widest uppercase">Waiting for others to join...</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -174,23 +391,18 @@ export default function VoiceVideoChannel({ channel, serverId, token, onLeave })
   }, [channel, serverId, token]);
 
   const handleDisconnected = () => {
-    console.log('Disconnected from LiveKit room – clearing state.');
     if (onLeave) onLeave();
   };
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-vyre-text p-6">
+      <div className="flex flex-col items-center justify-center h-full bg-[#111315] text-vyre-text p-6">
         <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 max-w-md w-full text-center">
           <div className="text-red-400 text-lg font-bold mb-2 font-pixel tracking-widest uppercase">⚠️ Error</div>
           <div className="text-sm text-vyre-muted whitespace-pre-line">{error}</div>
           <button
-            onClick={() => {
-              setError(null);
-              setLivekitToken('');
-              fetchToken();
-            }}
-            className="mt-6 px-6 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-400 font-medium transition"
+            onClick={fetchToken}
+            className="mt-6 px-6 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-red-400 font-medium transition"
           >
             Retry
           </button>
@@ -200,43 +412,43 @@ export default function VoiceVideoChannel({ channel, serverId, token, onLeave })
   }
 
   if (!livekitToken) {
-    return <div className="flex items-center justify-center h-full text-vyre-muted font-pixel text-[10px] tracking-widest uppercase opacity-50">Connecting...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-[#111315]">
+        <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2 }}>
+          <span className="font-pixel text-[10px] tracking-[0.2em] uppercase text-vyre-muted">Connecting...</span>
+        </motion.div>
+      </div>
+    );
   }
 
   return (
-    <div className="h-full flex flex-col bg-transparent relative z-10">
-      <div className="p-4 bg-vyre-card text-vyre-text border-b border-vyre-border flex-shrink-0 shadow-sm z-20 flex items-center space-x-3">
-        <div className="w-8 h-8 rounded-[8px] bg-vyre-secondary border border-vyre-border flex items-center justify-center text-vyre-muted">
-          <span className="font-pixel text-[10px]">🔊</span>
-        </div>
-        <span className="font-bold tracking-wide">{channel.name}</span>
+    <div className="h-full flex flex-col bg-[#111315] relative overflow-hidden">
+      {/* Premium Ambient Background */}
+      <div className="absolute inset-0 opacity-30 z-0 pointer-events-none">
+        <PixelBackground />
       </div>
-      <div className="flex-1 min-h-0 relative flex flex-col">
+
+      <div className="absolute top-0 left-0 w-full p-6 z-40 pointer-events-none flex items-center gap-4">
+        <div className="px-4 py-2 bg-[#181B1F]/80 backdrop-blur-md rounded-xl border border-white/5 shadow-lg flex items-center gap-3">
+          <div className="w-2 h-2 bg-vyre-accent rounded-sm shadow-[0_0_8px_#20C997]" />
+          <span className="font-bold tracking-wide text-sm text-white/90">{channel.name}</span>
+        </div>
+      </div>
+
+      <div className="flex-1 w-full h-full relative z-10">
         <LiveKitRoom
           serverUrl={process.env.REACT_APP_LIVEKIT_URL}
           token={livekitToken}
           connect={true}
           audio={true}
           video={true}
-          className="flex-1 flex flex-col min-h-0"
+          className="w-full h-full flex flex-col relative"
           onError={(err) => console.error('LiveKit error:', err)}
           onDisconnected={handleDisconnected}
         >
           <LayoutContextProvider>
-            <div className="flex-1 overflow-y-auto">
-              <VideoGrid />
-            </div>
-            <div className="flex-shrink-0 p-2 border-t border-vyre-border bg-vyre-card">
-              <ControlBar
-                controls={{
-                  microphone: true,
-                  camera: true,
-                  screenShare: true,
-                  chat: false,
-                  leave: true,
-                }}
-              />
-            </div>
+            <VideoGrid />
+            <CustomDock onLeave={onLeave} />
           </LayoutContextProvider>
         </LiveKitRoom>
       </div>
