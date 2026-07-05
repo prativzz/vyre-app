@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import { motion } from 'framer-motion';
+import { Eye, EyeOff } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelPanel from '../components/ui/PixelPanel';
 
@@ -87,7 +88,7 @@ export default function Login() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-vyre-muted hover:text-vyre-text transition-colors"
             >
-              {showPassword ? '🙈' : '👁️'}
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
           <button type="submit" className="btn-primary w-full py-3 uppercase tracking-wider font-pixel text-xs mt-2">
