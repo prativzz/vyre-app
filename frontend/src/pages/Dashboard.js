@@ -170,6 +170,17 @@ export default function Dashboard() {
 
 
 
+  const handleSelectServer = (server) => {
+    if (selectedServer?.id !== server?.id) {
+      // Clear stale data to prevent flashing old members/channels
+      setMembers([]);
+      setChannels([]);
+      setSelectedChannel(null);
+      setActiveVoiceChannel(null);
+      setSelectedServer(server);
+    }
+  };
+
   const handleCreateServer = async (name, template) => {
     const res = await fetch(`${API_URL}/servers/create`, {
       method: 'POST',
@@ -183,7 +194,7 @@ export default function Dashboard() {
       }).then(r => r.json());
       setServers(updatedServers);
       const created = updatedServers.find(s => s.id === newServerData.serverId);
-      if (created) setSelectedServer(created);
+      if (created) handleSelectServer(created);
     }
     setShowCreateModal(false);
   };
@@ -202,7 +213,7 @@ export default function Dashboard() {
         }).then(r => r.json());
         setServers(updatedServers);
         const joined = updatedServers.find(s => s.id === data.serverId);
-        if (joined) setSelectedServer(joined);
+        if (joined) handleSelectServer(joined);
       } else {
         alert(data.error || 'Invalid invite code');
       }
@@ -310,9 +321,8 @@ export default function Dashboard() {
           ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
           <ServerSidebar
-
         servers={servers}
-        onSelectServer={setSelectedServer}
+        onSelectServer={handleSelectServer}
         onCreateServer={handleCreateServer}
         onJoinServer={handleJoinServer}
         selectedServerId={selectedServer?.id}
@@ -321,7 +331,7 @@ export default function Dashboard() {
         pendingRequests={pendingRequests}
         onRefresh={refreshAll}
         onHome={() => {
-          setSelectedServer(null);
+          handleSelectServer(null);
           setSelectedFriend(null);
         }}
       />
@@ -432,7 +442,7 @@ export default function Dashboard() {
               {friends.map(f => (
                 <div 
                   key={f.friend_id} 
-                  onClick={() => { setSelectedServer(null); setSelectedFriend(f); }}
+                  onClick={() => { handleSelectServer(null); setSelectedFriend(f); }}
                   className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group cursor-pointer border border-transparent hover:border-vyre-border"
                 >
                   <div className="flex items-center space-x-3">
@@ -441,7 +451,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      onClick={(e) => { e.stopPropagation(); setSelectedServer(null); setSelectedFriend(f); }}
+                      onClick={(e) => { e.stopPropagation(); handleSelectServer(null); setSelectedFriend(f); }}
                       className="p-1.5 rounded text-vyre-muted hover:text-vyre-accent hover:bg-vyre-accent/10 transition-colors"
                       title="Message"
                     >
