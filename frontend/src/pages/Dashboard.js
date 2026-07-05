@@ -10,8 +10,8 @@ import DirectMessages from '../components/DirectMessages';
 import ProfileModal from '../components/ProfileModal';
 import CreateServerModal from '../components/CreateServerModal';
 import { MessageSquare, Menu, Users, X } from 'lucide-react';
-import SpatialBackground from './layout/SpatialBackground';
-import GlassPanel from './ui/GlassPanel';
+import SpatialBackground from '../components/layout/SpatialBackground';
+import GlassPanel from '../components/ui/GlassPanel';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCursorGlow } from '../hooks/useCursorGlow';
 
