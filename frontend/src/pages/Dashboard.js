@@ -9,6 +9,7 @@ import VoiceVideoChannel from '../components/VoiceVideoChannel';
 import DirectMessages from '../components/DirectMessages';
 import ProfileModal from '../components/ProfileModal';
 import CreateServerModal from '../components/CreateServerModal';
+import HeroInteraction from '../components/ui/HeroInteraction';
 import { MessageSquare, Menu, Users, X } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelPanel from '../components/ui/PixelPanel';
@@ -361,14 +362,14 @@ export default function Dashboard() {
         <PixelPanel className="flex-1 flex flex-col w-full h-full rounded-2xl shadow-lg border border-vyre-border">
         {!selectedServer && !selectedFriend ? (
           // Home page when no server and no friend selected
-          <div className="flex flex-1 items-center justify-center px-4">
-            <div className="text-center">
+          <HeroInteraction>
+            <div className="text-center px-4">
               <h1 className="text-7xl font-pixel font-bold text-vyre-accent tracking-wide leading-normal pb-4">
                 VYRE
               </h1>
               <p className="text-vyre-muted mt-0 text-xs font-pixel tracking-[0.2em] uppercase">Connect. Chat. Collaborate.</p>
             </div>
-          </div>
+          </HeroInteraction>
         ) : !selectedServer && selectedFriend ? (
           <DirectMessages 
             friend={selectedFriend}
