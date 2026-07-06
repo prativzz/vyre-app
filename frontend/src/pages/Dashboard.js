@@ -13,6 +13,7 @@ import HeroInteraction from '../components/ui/HeroInteraction';
 import { Menu, Users, X, UserCircle } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelPanel from '../components/ui/PixelPanel';
+import { motion } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -38,6 +39,7 @@ export default function Dashboard() {
   const [showLeftSidebar, setShowLeftSidebar] = useState(false);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [showMobileProfile, setShowMobileProfile] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef(null);
@@ -162,7 +164,7 @@ export default function Dashboard() {
 
   // Initial data fetch
   useEffect(() => {
-    refreshAll();
+    refreshAll().then(() => setIsDataLoaded(true));
   }, [refreshAll]);
 
   useEffect(() => {
@@ -317,6 +319,23 @@ export default function Dashboard() {
 
   const onlineCount = members.filter(m => m.online).length;
   const friendsOnline = friends.filter(f => f.online).length;
+
+  if (!isDataLoaded) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-vyre-dark text-vyre-text relative overflow-hidden">
+        <PixelBackground />
+        <motion.div 
+          initial={{ opacity: 0.5, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
+          className="z-10 flex flex-col items-center gap-6"
+        >
+          <div className="w-16 h-16 border-4 border-vyre-primary border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-pixel text-vyre-primary text-xl tracking-widest uppercase">Loading Interface...</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[100dvh] bg-vyre-bg overflow-hidden relative w-full max-w-[1920px] mx-auto">
