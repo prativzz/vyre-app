@@ -383,6 +383,7 @@ export default function Dashboard() {
         onHome={() => {
           handleSelectServer(null);
           setSelectedFriend(null);
+          setShowLeftSidebar(false);
         }}
       />
 
@@ -394,6 +395,7 @@ export default function Dashboard() {
             setSelectedChannel(ch);
             if (ch && ch.type === 'voice') setActiveVoiceChannel(ch);
             else setActiveVoiceChannel(null);
+            setShowLeftSidebar(false);
           }}
           serverName={selectedServer.name}
           inviteCode={selectedServer.invite_code}
