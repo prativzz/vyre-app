@@ -15,9 +15,10 @@ export function AuthProvider({ children }) {
     const waitForBackend = async () => {
       let isAlive = false;
       let attempt = 0;
+      const healthUrl = API_URL.replace(/\/api\/?$/, '') + '/health';
       while (!isAlive) {
         try {
-          const res = await axios.get(`${API_URL}/health`, { timeout: 5000 });
+          const res = await axios.get(healthUrl, { timeout: 5000 });
           if (res.status === 200) isAlive = true;
         } catch (err) {
           attempt++;
