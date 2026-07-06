@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import PixelBackground from '../layout/PixelBackground';
 
@@ -12,24 +13,18 @@ const MESSAGES = [
   'ENTERING VYRE...'
 ];
 
-// Global states to persist progress and prevent animation restarts across unmounts
-const APP_BOOT_TIME = Date.now();
 const BOOT_DURATION = 2500;
-let globalMsgIndex = 0;
-let hasMountedOnce = false;
+const APP_BOOT_TIME = Date.now();
 
-export default function PixelLoader() {
-  const [msgIndex, setMsgIndex] = useState(globalMsgIndex);
-  const [progress, setProgress] = useState(() => {
-    const elapsed = Date.now() - APP_BOOT_TIME;
-    return Math.min(Math.floor((elapsed / BOOT_DURATION) * 100), 100);
-  });
+// This is the actual continuous visual component that NEVER unmounts during load
+function ContinuousLoaderUI({ isFadingOut }) {
+  const [msgIndex, setMsgIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
 
-  // Handle message rotation globally
+  // Status text rotation
   useEffect(() => {
     const interval = setInterval(() => {
-      globalMsgIndex = (globalMsgIndex + 1) % MESSAGES.length;
-      setMsgIndex(globalMsgIndex);
+      setMsgIndex(prev => (prev + 1) % MESSAGES.length);
     }, 800);
     return () => clearInterval(interval);
   }, []);
@@ -39,95 +34,53 @@ export default function PixelLoader() {
     const updateProgress = () => {
       const elapsed = Date.now() - APP_BOOT_TIME;
       let nextProgress = Math.floor((elapsed / BOOT_DURATION) * 100);
-      
-      if (nextProgress > 100) {
-        nextProgress = 100;
-      }
+      if (nextProgress > 100) nextProgress = 100;
       setProgress(nextProgress);
     };
-
     updateProgress();
     const interval = setInterval(updateProgress, 30);
-    
     return () => clearInterval(interval);
-  }, []);
-
-  // Mark as mounted to prevent fade-in on remounts
-  useEffect(() => {
-    hasMountedOnce = true;
-  }, []);
-
-  // Genius clone-and-fade trick to animate unmount without modifying parent components
-  useEffect(() => {
-    return () => {
-      // If we are unmounting and progress is complete, perform the seamless fade-out
-      if (Date.now() - APP_BOOT_TIME >= BOOT_DURATION) {
-        const loaderDom = document.getElementById('vyre-pixel-loader');
-        if (loaderDom) {
-          const clone = loaderDom.cloneNode(true);
-          clone.id = 'vyre-pixel-loader-clone'; // prevent ID collision
-          
-          // Ensure clone stays exactly where it was, over the entire screen
-          clone.style.position = 'fixed';
-          clone.style.top = '0';
-          clone.style.left = '0';
-          clone.style.width = '100vw';
-          clone.style.height = '100vh';
-          clone.style.zIndex = '99999';
-          clone.style.transition = 'opacity 300ms ease-in-out';
-          
-          document.body.appendChild(clone);
-          
-          // Wait 150ms as requested, then fade out over 300ms
-          setTimeout(() => {
-            clone.style.opacity = '0';
-          }, 150);
-          
-          // Remove from DOM after fade completes
-          setTimeout(() => {
-            if (document.body.contains(clone)) {
-              document.body.removeChild(clone);
-            }
-          }, 500); // 150 + 300 + 50 buffer
-        }
-      }
-    };
   }, []);
 
   return (
     <div 
-      id="vyre-pixel-loader"
-      className="h-screen w-screen flex flex-col items-center justify-center bg-[#0F1113] text-vyre-text relative overflow-hidden"
+      className="fixed inset-0 flex flex-col items-center justify-center bg-[#0B0D0F] text-vyre-text overflow-hidden z-[99999]"
+      style={{
+        transition: 'opacity 250ms ease-in-out',
+        opacity: isFadingOut ? 0 : 1,
+        pointerEvents: isFadingOut ? 'none' : 'auto'
+      }}
     >
-      {/* Extremely subtle background enhancements */}
-      <div className="absolute inset-0 opacity-[0.4] pointer-events-none grayscale">
+      {/* Background Enhancements - Drastically reduced particle visibility */}
+      <div className="absolute inset-0 opacity-[0.25] pointer-events-none grayscale">
         <PixelBackground />
       </div>
-      <div className="absolute inset-0 bg-[#0F1113]/90 pointer-events-none" />
-      <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
+      <div className="absolute inset-0 bg-[#0B0D0F]/95 pointer-events-none" />
+      <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
 
-      <motion.div 
-        initial={!hasMountedOnce ? { opacity: 0 } : false}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="z-10 flex flex-col items-center"
-      >
-        {/* Vyre Logo - Printed, matte, no glow */}
-        <div className="text-center mb-10">
-          <h1 className="text-5xl font-bold font-pixel text-[#22D3A6] opacity-90 tracking-[0.25em] uppercase">
+      <div className="z-10 flex flex-col items-center">
+        {/* Vyre Logo - Printed, matte, extremely crisp (no anti-aliasing) */}
+        <div className="text-center mb-14">
+          <h1 
+            className="text-5xl font-bold font-pixel text-[#168E6F] opacity-90 tracking-[0.3em] uppercase" 
+            style={{ WebkitFontSmoothing: 'none', fontSmooth: 'never', textRendering: 'pixelated' }}
+          >
             Vyre
           </h1>
         </div>
 
-        {/* Loading Bar Container - Matte and subtle */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-48 sm:w-64 h-1.5 bg-[#141619] border border-[#23272C] overflow-hidden relative">
+        {/* Loading Bar Container - Matte and subtle, increased spacing */}
+        <div className="flex items-center gap-6 mb-10">
+          <div className="w-48 sm:w-64 h-1.5 bg-[#121417] border border-[#272B31] overflow-hidden relative">
             <div 
-              className="h-full bg-[#1AA985]" // Darker, flatter emerald
+              className="h-full bg-[#137A5F]" // Matte, desaturated fill
               style={{ width: `${progress}%` }} 
             />
           </div>
-          <div className="font-pixel text-[#1AA985] text-sm w-12 text-right tracking-widest">
+          <div 
+            className="font-pixel text-[#137A5F] text-sm w-12 text-right tracking-[0.1em]" 
+            style={{ WebkitFontSmoothing: 'none', fontSmooth: 'never', textRendering: 'pixelated' }}
+          >
             {progress}%
           </div>
         </div>
@@ -137,17 +90,82 @@ export default function PixelLoader() {
           <AnimatePresence mode="wait">
             <motion.p
               key={MESSAGES[msgIndex]}
-              initial={!hasMountedOnce ? { opacity: 0 } : false}
+              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="absolute font-pixel text-[#70767D] text-xs tracking-[0.25em] uppercase text-center"
+              className="absolute font-pixel text-[#5C6167] text-xs tracking-[0.3em] uppercase text-center"
+              style={{ WebkitFontSmoothing: 'none', fontSmooth: 'never', textRendering: 'pixelated' }}
             >
               {MESSAGES[msgIndex]}
             </motion.p>
           </AnimatePresence>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
+}
+
+// Singleton state to guarantee the loader survives React unmounts during route transitions
+let globalRoot = null;
+let container = null;
+let activeMounts = 0;
+let fadeOutTimeout = null;
+let unmountTimeout = null;
+let isCurrentlyFadingOut = false;
+
+export default function PixelLoader() {
+  useEffect(() => {
+    activeMounts++;
+    
+    // If a new mount happens before we finish unmounting, cancel the destruction!
+    // This perfectly bridges the gap between App.js unmounting and Dashboard.js remounting
+    if (fadeOutTimeout) clearTimeout(fadeOutTimeout);
+    if (unmountTimeout) clearTimeout(unmountTimeout);
+
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'vyre-continuous-loader';
+      document.body.appendChild(container);
+      globalRoot = createRoot(container);
+      isCurrentlyFadingOut = false;
+    }
+    
+    if (globalRoot) {
+      globalRoot.render(<ContinuousLoaderUI isFadingOut={isCurrentlyFadingOut} />);
+    }
+
+    return () => {
+      activeMounts--;
+      
+      // Wait for 1 tick to see if another PixelLoader mounts (e.g. App to Dashboard transition)
+      setTimeout(() => {
+        if (activeMounts === 0 && globalRoot) {
+          
+          // Wait 150-200ms at 100% before fading out
+          fadeOutTimeout = setTimeout(() => {
+            isCurrentlyFadingOut = true;
+            if (globalRoot) {
+              globalRoot.render(<ContinuousLoaderUI isFadingOut={true} />);
+            }
+            
+            // Fade takes 250ms. Wait 300ms to completely unmount the DOM.
+            unmountTimeout = setTimeout(() => {
+              if (globalRoot) {
+                globalRoot.unmount();
+                globalRoot = null;
+                if (container && document.body.contains(container)) {
+                  document.body.removeChild(container);
+                  container = null;
+                }
+              }
+            }, 300);
+          }, 150);
+        }
+      }, 0);
+    };
+  }, []);
+
+  // Render a completely empty placeholder to satisfy React, it takes no visual space.
+  return <div style={{ display: 'none' }} />;
 }
