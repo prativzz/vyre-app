@@ -133,7 +133,7 @@ export default function Dashboard() {
   }, [token]);
 
   const refreshAll = useCallback(() => {
-    Promise.all([
+    return Promise.all([
       fetchServers(),
       fetchFriends(),
       fetchMembers(),
