@@ -64,13 +64,13 @@ export default function HeroInteraction({ children }) {
           hexes.push({
             x, y,
             color: getRandomColor(),
-            noise: Math.random() * 80 - 40, 
-            delayOut: Math.random() * 200, 
-            fadeInSpeed: 1000 / (150 + Math.random() * 100), // 150-250ms fade in
-            fadeSpeed: 1000 / (500 + Math.random() * 200),  // 500-700ms fade out
+            noise: Math.random() * 40 - 20, // Less noise for a smoother, more contiguous shape
+            delayOut: Math.random() * 150, // Smoother delay
+            fadeInSpeed: 1000 / (250 + Math.random() * 100), // 250-350ms fade in for a gentler appear
+            fadeSpeed: 1000 / (700 + Math.random() * 400),  // 700-1100ms fade out for a longer, silky trail
             opacity: 0,
-            maxOpacity: inTextBounds ? (0.08 + Math.random() * 0.07) : (0.4 + Math.random() * 0.3), // 8-15% behind text, 40-70% elsewhere
-            scale: 0.92, 
+            maxOpacity: inTextBounds ? (0.08 + Math.random() * 0.07) : (0.4 + Math.random() * 0.3),
+            scale: 0.95, // Start closer to 1 for less jarring scale snap
             timeSinceInactive: 0
           });
         }
@@ -126,20 +126,20 @@ export default function HeroInteraction({ children }) {
           const dy = s.y - hex.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           
-          if (dist + hex.noise < 45) {
+          if (dist + hex.noise < 75) { // Increased radius for a more generous, smoother activation area
             isNearCursor = true;
           }
         }
         
         if (isNearCursor) {
           hex.opacity = Math.min(hex.maxOpacity, hex.opacity + dt * hex.fadeInSpeed);
-          hex.scale = Math.min(1, hex.scale + dt * (0.08 * hex.fadeInSpeed)); 
+          hex.scale = Math.min(1, hex.scale + dt * (0.05 * hex.fadeInSpeed)); 
           hex.timeSinceInactive = 0;
         } else {
           hex.timeSinceInactive += dt * 1000;
           if (hex.timeSinceInactive > hex.delayOut) {
             hex.opacity = Math.max(0, hex.opacity - dt * hex.fadeSpeed);
-            hex.scale = Math.max(0.92, hex.scale - dt * (0.08 * hex.fadeSpeed));
+            hex.scale = Math.max(0.95, hex.scale - dt * (0.05 * hex.fadeSpeed));
           }
         }
         
