@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 
 const getRandomColor = () => {
   const rand = Math.random();
@@ -10,148 +10,99 @@ const getRandomColor = () => {
 };
 
 export default function HeroInteraction({ children }) {
-  const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const contentRef = useRef(null);
+  const clusterRef = useRef(null);
 
-  const state = useRef({
-    x: 0,
-    y: 0,
-    isHovering: false,
-    hexes: [],
-    width: 0,
-    height: 0,
-    contentBox: null,
-    lastTime: performance.now()
-  });
+  const target = useRef({ x: -1000, y: -1000, active: false });
+  const current = useRef({ x: -1000, y: -1000, opacity: 0 });
+  const contentBox = useRef(null);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let animationFrameId;
-
-    const hexPath = new Path2D();
+  // Generate the static hex polygon points
+  const hexPoints = useMemo(() => {
     const drawR = 14; 
-    for (let i = 0; i < 6; i++) {
+    return Array.from({ length: 6 }).map((_, i) => {
       const angle = (Math.PI / 180) * (60 * i - 30);
-      const px = drawR * Math.cos(angle);
-      const py = drawR * Math.sin(angle);
-      if (i === 0) hexPath.moveTo(px, py);
-      else hexPath.lineTo(px, py);
-    }
-    hexPath.closePath();
+      return `${drawR * Math.cos(angle)},${drawR * Math.sin(angle)}`;
+    }).join(' ');
+  }, []);
 
-    const generateGrid = (width, height, contentBox) => {
-      const R = 15.5; 
-      const W = Math.sqrt(3) * R;
-      const xSpacing = W;
-      const ySpacing = 1.5 * R;
-      
-      const cols = Math.ceil(width / xSpacing) + 2;
-      const rows = Math.ceil(height / ySpacing) + 2;
-
-      const hexes = [];
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-          const x = col * xSpacing + (row % 2 === 1 ? xSpacing / 2 : 0);
-          const y = row * ySpacing;
-          
-          let inTextBounds = false;
-          if (contentBox) {
-            inTextBounds = x > contentBox.left && x < contentBox.right && y > contentBox.top && y < contentBox.bottom;
-          }
-          
-          hexes.push({
+  // Generate the single cluster of hexagons ONCE to ensure zero duplicate nodes
+  const hexes = useMemo(() => {
+    const R = 15.5; 
+    const W = Math.sqrt(3) * R;
+    const xSpacing = W;
+    const ySpacing = 1.5 * R;
+    
+    const generated = [];
+    for (let row = -6; row <= 6; row++) {
+      for (let col = -6; col <= 6; col++) {
+        const x = col * xSpacing + (row % 2 === 1 ? xSpacing / 2 : 0);
+        const y = row * ySpacing;
+        
+        const dist = Math.sqrt(x*x + y*y);
+        const noise = Math.random() * 40 - 20;
+        
+        if (dist + noise < 55) { // Strict radius
+          generated.push({
             x, y,
             color: getRandomColor(),
-            noise: Math.random() * 40 - 20, // Less noise for a smoother, more contiguous shape
-            delayOut: Math.random() * 150, // Smoother delay
-            fadeInSpeed: 1000 / (250 + Math.random() * 100), // 250-350ms fade in for a gentler appear
-            fadeSpeed: 1000 / (700 + Math.random() * 400),  // 700-1100ms fade out for a longer, silky trail
-            opacity: 0,
-            maxOpacity: inTextBounds ? (0.08 + Math.random() * 0.07) : (0.4 + Math.random() * 0.3),
-            scale: 0.95, // Start closer to 1 for less jarring scale snap
-            timeSinceInactive: 0
+            opacity: 0.4 + Math.random() * 0.3, // Matches original exact opacity
+            scale: 0.95
           });
         }
       }
-      return hexes;
-    };
+    }
+    return generated;
+  }, []);
 
-    const resize = () => {
-      if (containerRef.current && canvasRef.current) {
+  useEffect(() => {
+    const updateContentBox = () => {
+      if (containerRef.current && contentRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        
-        let contentBox = null;
-        if (contentRef.current) {
-          const textRect = contentRef.current.getBoundingClientRect();
-          contentBox = {
-            left: textRect.left - rect.left - 20,
-            right: textRect.right - rect.left + 20,
-            top: textRect.top - rect.top - 20,
-            bottom: textRect.bottom - rect.top + 20,
-          };
-          state.current.contentBox = contentBox;
-        }
-
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-        
-        state.current.width = rect.width;
-        state.current.height = rect.height;
-        state.current.hexes = generateGrid(rect.width, rect.height, contentBox);
+        const textRect = contentRef.current.getBoundingClientRect();
+        contentBox.current = {
+          left: textRect.left - rect.left - 20,
+          right: textRect.right - rect.left + 20,
+          top: textRect.top - rect.top - 20,
+          bottom: textRect.bottom - rect.top + 20,
+        };
       }
     };
-    
-    window.addEventListener('resize', resize);
-    
-    // Slight delay to ensure fonts/layout are loaded before calculating text bounds
-    setTimeout(resize, 100);
 
-    const render = (time) => {
-      const s = state.current;
-      const dt = Math.min((time - s.lastTime) / 1000, 0.1);
-      s.lastTime = time;
+    window.addEventListener('resize', updateContentBox);
+    setTimeout(updateContentBox, 100);
 
-      ctx.clearRect(0, 0, s.width, s.height);
-
-      for (let i = 0; i < s.hexes.length; i++) {
-        const hex = s.hexes[i];
-        let isNearCursor = false;
-        
-        if (s.isHovering) {
-          const dx = s.x - hex.x;
-          const dy = s.y - hex.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          
-          if (dist + hex.noise < 55) { // Reduced radius to show fewer hexagons, keeping the smooth trail
-            isNearCursor = true;
-          }
+    let animationFrameId;
+    const render = () => {
+      // Critically damped spring-like lerp. 
+      // 35% distance covered per frame (~120-180ms visual duration)
+      // Perfectly smooth, zero overshoot, zero lagging individual hexes.
+      const lerp = 0.35; 
+      
+      current.current.x += (target.current.x - current.current.x) * lerp;
+      current.current.y += (target.current.y - current.current.y) * lerp;
+      
+      let isBehindText = false;
+      if (contentBox.current) {
+        const { left, right, top, bottom } = contentBox.current;
+        const cx = current.current.x;
+        const cy = current.current.y;
+        if (cx > left && cx < right && cy > top && cy < bottom) {
+          isBehindText = true;
         }
-        
-        if (isNearCursor) {
-          hex.opacity = Math.min(hex.maxOpacity, hex.opacity + dt * hex.fadeInSpeed);
-          hex.scale = Math.min(1, hex.scale + dt * (0.05 * hex.fadeInSpeed)); 
-          hex.timeSinceInactive = 0;
-        } else {
-          hex.timeSinceInactive += dt * 1000;
-          if (hex.timeSinceInactive > hex.delayOut) {
-            hex.opacity = Math.max(0, hex.opacity - dt * hex.fadeSpeed);
-            hex.scale = Math.max(0.95, hex.scale - dt * (0.05 * hex.fadeSpeed));
-          }
-        }
-        
-        if (hex.opacity > 0.01) {
-          ctx.save();
-          ctx.translate(hex.x, hex.y);
-          ctx.scale(hex.scale, hex.scale);
-          ctx.globalAlpha = hex.opacity;
-          ctx.fillStyle = hex.color;
-          ctx.fill(hexPath);
-          ctx.restore();
-        }
+      }
+      
+      // If hovering the text, dim the entire cluster to 15% to prevent washing out the logo
+      const finalTargetOpacity = target.current.active ? (isBehindText ? 0.15 : 1) : 0;
+      
+      // Opacity lerp (slightly slower for a relaxed fade)
+      current.current.opacity += (finalTargetOpacity - current.current.opacity) * 0.15;
+      
+      if (clusterRef.current) {
+        // 100% GPU accelerated transform. Prioritizes the latest coordinates immediately.
+        clusterRef.current.style.transform = `translate3d(${current.current.x}px, ${current.current.y}px, 0)`;
+        clusterRef.current.style.opacity = current.current.opacity;
       }
       
       animationFrameId = requestAnimationFrame(render);
@@ -160,7 +111,7 @@ export default function HeroInteraction({ children }) {
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', updateContentBox);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -168,32 +119,55 @@ export default function HeroInteraction({ children }) {
   const handleMouseMove = (e) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    state.current.x = e.clientX - rect.left;
-    state.current.y = e.clientY - rect.top;
-  };
-
-  const handleMouseEnter = () => {
-    state.current.isHovering = true;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Snap immediately on first hover to prevent flying in from off-screen
+    if (current.current.x === -1000) {
+      current.current.x = x;
+      current.current.y = y;
+    }
+    
+    // Always prioritize the latest cursor position (skip intermediate mouse events)
+    target.current.x = x;
+    target.current.y = y;
+    target.current.active = true;
   };
 
   const handleMouseLeave = () => {
-    state.current.isHovering = false;
+    target.current.active = false;
   };
 
   return (
     <div 
       ref={containerRef}
-      className="relative flex flex-1 w-full h-full"
+      className="relative flex flex-1 w-full h-full overflow-hidden bg-vyre-bg"
       onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
+      onMouseEnter={() => { target.current.active = true; }}
       onMouseLeave={handleMouseLeave}
     >
-      <canvas 
-        ref={canvasRef}
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{ width: '100%', height: '100%' }}
-      />
-      <div className="relative z-10 flex flex-1 items-center justify-center">
+      {/* The Single Moving Cluster Instance */}
+      <div 
+        ref={clusterRef}
+        className="pointer-events-none absolute left-0 top-0 will-change-transform z-0"
+        style={{ width: 0, height: 0, opacity: 0 }}
+      >
+        {hexes.map((hex, i) => (
+          <svg 
+            key={i} 
+            className="absolute overflow-visible" 
+            style={{ 
+              transform: `translate3d(${hex.x}px, ${hex.y}px, 0) scale(${hex.scale})`,
+              opacity: hex.opacity,
+              left: 0, top: 0
+            }}
+          >
+            <polygon points={hexPoints} fill={hex.color} />
+          </svg>
+        ))}
+      </div>
+
+      <div className="relative z-10 flex flex-1 items-center justify-center w-full h-full">
         <div ref={contentRef} className="pointer-events-none">
           <div className="pointer-events-auto">
             {children}
