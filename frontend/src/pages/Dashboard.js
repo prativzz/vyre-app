@@ -492,20 +492,13 @@ export default function Dashboard() {
                   <div 
                     key={f.friend_id} 
                     onClick={() => { handleSelectServer(null); setSelectedFriend(f); setShowRightSidebar(false); }}
-                    className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group cursor-pointer border border-transparent hover:border-vyre-border hover:-translate-y-[2px] hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(44,200,140,0.05)]"
+                    className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group cursor-pointer border border-transparent hover:border-vyre-border"
                   >
                     <div className="flex items-center space-x-3">
                       <span className={`w-2 h-2 rounded-[2px] shadow-sm ${f.online ? 'bg-vyre-accent' : 'bg-vyre-border'}`}></span>
                       <span className="text-sm font-medium text-vyre-text group-hover:text-white transition-colors">{f.display_name || f.username}</span>
                     </div>
                     <div className="flex items-center space-x-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleSelectServer(null); setSelectedFriend(f); setShowRightSidebar(false); }}
-                        className="hidden lg:block p-1.5 rounded text-vyre-muted hover:text-vyre-accent hover:bg-vyre-accent/10 transition-colors"
-                        title="Message"
-                      >
-                        <MessageSquare size={14} />
-                      </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); removeFriend(f.friend_id); }}
                         className="p-2 lg:p-1.5 min-w-[36px] min-h-[36px] lg:min-w-0 lg:min-h-0 flex items-center justify-center rounded text-vyre-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
