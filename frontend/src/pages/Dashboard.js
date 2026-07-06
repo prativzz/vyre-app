@@ -645,11 +645,7 @@ export default function Dashboard() {
               <span>Edit Profile</span>
               <span className="text-vyre-muted">✎</span>
             </button>
-            <button
-              className="w-full py-3.5 rounded-xl bg-vyre-secondary/50 border border-vyre-border text-vyre-muted text-sm font-medium opacity-50 cursor-not-allowed"
-            >
-              Settings (Coming Soon)
-            </button>
+
           </div>
 
           <div className="mt-auto relative z-10">
