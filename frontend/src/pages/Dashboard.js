@@ -81,15 +81,17 @@ export default function Dashboard() {
       const data = await res.json();
       
       // Prevent race condition: ignore if user switched servers during fetch
-      if (currentServerIdRef.current !== fetchId) return;
+      if (currentServerIdRef.current !== fetchId) return true;
       
       if (Array.isArray(data)) {
         setMembers(data);
       } else {
         setMembers([]);
       }
+      return true;
     } catch (err) {
       console.error('Failed to fetch members:', err);
+      return false;
     }
   }, [selectedServer, token]);
 
@@ -101,8 +103,10 @@ export default function Dashboard() {
       if (!res.ok) throw new Error('Failed to fetch friends');
       const data = await res.json();
       setFriends(data);
+      return true;
     } catch (err) {
       console.error('Failed to fetch friends:', err);
+      return false;
     }
   }, [token]);
 
@@ -114,8 +118,10 @@ export default function Dashboard() {
       if (!res.ok) throw new Error('Failed to fetch pending requests');
       const data = await res.json();
       setPendingRequests(data);
+      return true;
     } catch (err) {
       console.error('Failed to fetch pending requests:', err);
+      return false;
     }
   }, [token]);
 
@@ -127,18 +133,23 @@ export default function Dashboard() {
       if (!res.ok) throw new Error('Failed to fetch servers');
       const data = await res.json();
       setServers(data);
+      return true;
     } catch (err) {
       console.error('Failed to fetch servers:', err);
+      return false;
     }
   }, [token]);
 
-  const refreshAll = useCallback(() => {
-    return Promise.all([
+  const refreshAll = useCallback(async () => {
+    const results = await Promise.all([
       fetchServers(),
       fetchFriends(),
       fetchMembers(),
       fetchPendingRequests()
-    ]).catch(err => console.error("Error refreshing data:", err));
+    ]);
+    if (results.every(r => r === true)) {
+      setIsDataLoaded(true);
+    }
   }, [fetchServers, fetchFriends, fetchMembers, fetchPendingRequests]);
 
   const startRetry = useCallback(() => {
@@ -164,7 +175,7 @@ export default function Dashboard() {
 
   // Initial data fetch
   useEffect(() => {
-    refreshAll().then(() => setIsDataLoaded(true));
+    refreshAll();
   }, [refreshAll]);
 
   useEffect(() => {
@@ -320,7 +331,7 @@ export default function Dashboard() {
   const onlineCount = members.filter(m => m.online).length;
   const friendsOnline = friends.filter(f => f.online).length;
 
-  if (!isDataLoaded) {
+  if (!isDataLoaded || !currentUser) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-vyre-dark text-vyre-text relative overflow-hidden">
         <PixelBackground />
