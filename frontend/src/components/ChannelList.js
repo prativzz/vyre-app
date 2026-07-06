@@ -133,7 +133,7 @@ export default function ChannelList({
     return (
       <div
         key={ch.id}
-        className={`flex items-center justify-between px-2 py-1.5 rounded-lg cursor-pointer transition group ${
+        className={`flex items-center justify-between px-2 py-1.5 min-h-[44px] lg:min-h-0 rounded-lg cursor-pointer transition group ${
           selectedChannel?.id === ch.id
             ? 'bg-vyre-secondary text-vyre-text font-medium'
             : 'text-vyre-muted hover:bg-vyre-secondary hover:text-vyre-text'
@@ -158,11 +158,11 @@ export default function ChannelList({
             <span className="text-sm truncate">{ch.name}</span>
           )}
         </div>
-        <div className="flex items-center space-x-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition">
+        <div className="flex items-center space-x-1 flex-shrink-0 opacity-100 lg:opacity-0 group-hover:opacity-100 transition">
           {!isEditing && (
             <button 
               onClick={(e) => { e.stopPropagation(); setEditingChannel({ id: ch.id, name: ch.name }); }} 
-              className="p-1.5 rounded text-vyre-muted hover:text-vyre-accent hover:bg-vyre-accent/10 transition-colors" 
+              className="p-1.5 min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center rounded text-vyre-muted hover:text-vyre-accent hover:bg-vyre-accent/10 transition-colors" 
               disabled={isLoading}
               title="Edit Channel"
             >
@@ -171,7 +171,7 @@ export default function ChannelList({
           )}
           <button 
             onClick={(e) => { e.stopPropagation(); confirmDelete(ch.id); }} 
-            className="p-1.5 rounded text-vyre-muted hover:text-red-400 hover:bg-red-500/10 transition-colors" 
+            className="p-1.5 min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center rounded text-vyre-muted hover:text-red-400 hover:bg-red-500/10 transition-colors" 
             disabled={isLoading}
             title="Delete Channel"
           >
@@ -186,14 +186,14 @@ export default function ChannelList({
   const voiceChannels = channels.filter(c => c.type === 'voice');
 
   return (
-    <PixelPanel className="w-64 flex-shrink-0 p-3 flex flex-col h-full">
-      <div className="flex items-center justify-between mb-4 px-2 flex-shrink-0">
+    <PixelPanel className="w-72 lg:w-64 max-w-[85vw] flex-shrink-0 p-3 flex flex-col h-full border-r border-vyre-border lg:border-none shadow-lg lg:shadow-none">
+      <div className="flex items-center justify-between mb-4 px-2 min-h-[44px] flex-shrink-0">
         <span className="text-sm font-bold text-vyre-text truncate mr-2 font-pixel">{serverName || 'Server'}</span>
         <div className="flex items-center space-x-1">
           {currentUserId === serverOwnerId && (
             <button 
               onClick={handleDeleteServer} 
-              className="p-1.5 rounded text-vyre-muted hover:text-red-400 hover:bg-red-500/10 transition-colors" 
+              className="p-1.5 min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center rounded text-vyre-muted hover:text-red-400 hover:bg-red-500/10 transition-colors" 
               title="Delete Server"
             >
               <Trash2 size={14} />
@@ -214,7 +214,7 @@ export default function ChannelList({
       <div className="mb-4 flex-1 overflow-y-auto">
         <div className="flex items-center justify-between px-2 mb-2">
           <h3 className="text-[10px] font-pixel text-vyre-muted uppercase tracking-widest">Text channels</h3>
-          <button onClick={() => openCreateModal('text')} className="text-vyre-muted hover:text-vyre-accent text-lg leading-none" title="Create text channel">+</button>
+          <button onClick={() => openCreateModal('text')} className="text-vyre-muted hover:text-vyre-accent text-lg leading-none min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center" title="Create text channel">+</button>
         </div>
         <div className="mt-1 space-y-1">
           {textChannels.map(renderChannel)}
@@ -224,7 +224,7 @@ export default function ChannelList({
       <div className="flex-1 overflow-y-auto">
         <div className="flex items-center justify-between px-2 mb-2">
           <h3 className="text-[10px] font-pixel text-vyre-muted uppercase tracking-widest">Voice channels</h3>
-          <button onClick={() => openCreateModal('voice')} className="text-vyre-muted hover:text-vyre-accent text-lg leading-none" title="Create voice channel">+</button>
+          <button onClick={() => openCreateModal('voice')} className="text-vyre-muted hover:text-vyre-accent text-lg leading-none min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center" title="Create voice channel">+</button>
         </div>
         <div className="mt-1 space-y-1">
           {voiceChannels.map(renderChannel)}

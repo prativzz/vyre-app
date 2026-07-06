@@ -10,7 +10,7 @@ import DirectMessages from '../components/DirectMessages';
 import ProfileModal from '../components/ProfileModal';
 import CreateServerModal from '../components/CreateServerModal';
 import HeroInteraction from '../components/ui/HeroInteraction';
-import { MessageSquare, Menu, Users, X } from 'lucide-react';
+import { MessageSquare, Menu, Users, X, UserCircle } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelPanel from '../components/ui/PixelPanel';
 
@@ -37,6 +37,7 @@ export default function Dashboard() {
   // Mobile responsiveness state
   const [showLeftSidebar, setShowLeftSidebar] = useState(false);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
+  const [showMobileProfile, setShowMobileProfile] = useState(false);
 
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef(null);
@@ -311,22 +312,36 @@ export default function Dashboard() {
       <PixelBackground />
       
       {/* Mobile Header (visible only on small screens) */}
-      <div className="lg:hidden flex items-center justify-between p-3 bg-vyre-card border-b border-vyre-border absolute top-0 w-full z-30">
+      <div className="lg:hidden flex items-center justify-between p-3 bg-vyre-card border-b border-vyre-border absolute top-0 w-full z-30 h-[60px]">
         <button 
           onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-          className="p-2 text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
+          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
         >
           {showLeftSidebar ? <X size={20} /> : <Menu size={20} />}
         </button>
-        <div className="font-bold font-pixel text-lg text-vyre-accent">
+        <div className="font-bold font-pixel text-lg text-vyre-accent truncate px-2 text-center">
           {selectedServer ? selectedServer.name : (selectedFriend ? 'Direct Message' : 'Vyre')}
         </div>
-        <button 
-          onClick={() => setShowRightSidebar(!showRightSidebar)}
-          className="p-2 text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
-        >
-          {showRightSidebar ? <X size={20} /> : <Users size={20} />}
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setShowRightSidebar(!showRightSidebar)}
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
+          >
+            {showRightSidebar ? <X size={20} /> : <Users size={20} />}
+          </button>
+          <button 
+            onClick={() => setShowMobileProfile(!showMobileProfile)}
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
+          >
+            {showMobileProfile ? <X size={20} /> : (
+              currentUser?.avatar ? (
+                <img src={currentUser.avatar} alt="Avatar" className="w-6 h-6 rounded-md object-cover" />
+              ) : (
+                <UserCircle size={20} />
+              )
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Main Container for all content */}
@@ -440,7 +455,7 @@ export default function Dashboard() {
       {/* Right sidebar */}
       <div 
         className={`
-          absolute lg:relative right-0 z-40 h-full w-72 flex flex-col gap-4 transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
+          absolute lg:relative right-0 z-40 h-full w-[85vw] max-w-[288px] lg:w-72 flex flex-col gap-4 transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
           ${showRightSidebar ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
         `}
       >
@@ -557,7 +572,7 @@ export default function Dashboard() {
         </PixelPanel>
 
         {/* Lower Card: Profile & Logout */}
-        <PixelPanel className="flex-shrink-0 p-4 rounded-2xl border border-vyre-border shadow-lg animate-fade-in flex flex-col">
+        <PixelPanel className="hidden lg:flex flex-shrink-0 p-4 rounded-2xl border border-vyre-border shadow-lg animate-fade-in flex-col">
           <div
             onClick={() => setShowProfileModal(true)}
             className="flex items-center space-x-3 p-2 rounded-xl bg-vyre-secondary hover:bg-vyre-border cursor-pointer transition-colors"
@@ -580,6 +595,71 @@ export default function Dashboard() {
           >
             Logout
           </button>
+        </PixelPanel>
+      </div>
+
+      {/* Mobile Profile Drawer Overlay */}
+      {showMobileProfile && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setShowMobileProfile(false)}
+        />
+      )}
+
+      {/* Mobile Profile Drawer */}
+      <div 
+        className={`
+          absolute right-0 z-40 h-full w-[85vw] max-w-[288px] flex flex-col p-4 transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden
+          ${showMobileProfile ? 'translate-x-0' : 'translate-x-full'}
+        `}
+      >
+        <PixelPanel className="flex-1 p-6 rounded-2xl border border-vyre-border shadow-lg animate-fade-in flex flex-col relative overflow-hidden">
+          <div className="absolute inset-0 bg-vyre-accent/5 pointer-events-none" />
+          
+          <h2 className="font-pixel text-[11px] text-vyre-muted uppercase tracking-widest mb-6">Account</h2>
+          
+          <div className="flex flex-col items-center mb-8 relative z-10">
+            <div className="w-24 h-24 rounded-2xl bg-vyre-accent flex items-center justify-center overflow-hidden shadow-lg relative text-vyre-bg border-2 border-vyre-card">
+              <span className="font-bold text-3xl absolute font-pixel">{(currentUser?.display_name || currentUser?.username)?.[0]?.toUpperCase()}</span>
+              {currentUser?.avatar && (
+                <img src={currentUser.avatar} alt="avatar" className="w-full h-full object-cover relative z-10" referrerPolicy="no-referrer" onError={(e) => e.target.style.display = 'none'} />
+              )}
+              <div className="absolute -bottom-2 -right-2 w-6 h-6 rounded-lg bg-vyre-accent border-4 border-vyre-card shadow-sm z-20"></div>
+            </div>
+            
+            <h3 className="mt-4 text-xl font-bold text-vyre-text">{currentUser?.display_name || currentUser?.username}</h3>
+            <p className="text-vyre-muted text-sm mt-1">@{currentUser?.username}</p>
+            <div className="mt-3 px-3 py-1 rounded-full bg-vyre-secondary border border-vyre-border text-xs font-pixel tracking-wider text-vyre-accent uppercase animate-pulse shadow-sm">
+              {currentUser?.status || "Online"}
+            </div>
+          </div>
+
+          <div className="flex-1 space-y-3 relative z-10">
+            <button
+              onClick={() => {
+                setShowMobileProfile(false);
+                setShowProfileModal(true);
+              }}
+              className="w-full py-3.5 rounded-xl bg-vyre-secondary hover:bg-vyre-border border border-vyre-border text-vyre-text text-sm font-medium transition-all shadow-sm flex items-center justify-center gap-2"
+            >
+              <span>Edit Profile</span>
+              <span className="text-vyre-muted">✎</span>
+            </button>
+            <button
+              className="w-full py-3.5 rounded-xl bg-vyre-secondary/50 border border-vyre-border text-vyre-muted text-sm font-medium opacity-50 cursor-not-allowed"
+            >
+              Settings (Coming Soon)
+            </button>
+          </div>
+
+          <div className="mt-auto relative z-10">
+            <button
+              onClick={logout}
+              className="w-full py-3.5 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-sm font-medium transition-all shadow-sm"
+            >
+              Logout
+            </button>
+          </div>
         </PixelPanel>
       </div>
 
