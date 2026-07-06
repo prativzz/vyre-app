@@ -308,11 +308,11 @@ export default function Dashboard() {
   const friendsOnline = friends.filter(f => f.online).length;
 
   return (
-    <div className="flex h-screen bg-vyre-bg overflow-hidden relative">
+    <div className="flex flex-col h-[100dvh] bg-vyre-bg overflow-hidden relative w-full max-w-[1920px] mx-auto">
       <PixelBackground />
       
       {/* Mobile Header (visible only on small screens) */}
-      <div className="lg:hidden flex items-center justify-between p-3 bg-vyre-card border-b border-vyre-border absolute top-0 w-full z-30 h-[60px]">
+      <div className="lg:hidden flex-none flex items-center justify-between p-3 bg-vyre-card border-b border-vyre-border w-full z-30 h-[60px] relative">
         <button 
           onClick={() => setShowLeftSidebar(!showLeftSidebar)}
           className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
@@ -345,11 +345,11 @@ export default function Dashboard() {
       </div>
 
       {/* Main Container for all content */}
-      <div className="flex flex-1 w-full h-full pt-[60px] p-2 lg:p-6 gap-4 z-10 max-w-[1920px] mx-auto">
+      <div className="flex flex-1 w-full relative overflow-hidden lg:p-6 lg:gap-4 z-10 pb-[env(safe-area-inset-bottom)]">
         
         {/* Left Sidebars Wrapper */}
         <div className={`
-          absolute lg:relative z-40 h-full flex gap-4 transform transition-transform duration-300 ease-in-out
+          absolute lg:relative z-40 h-full flex lg:gap-4 transform transition-transform duration-300 ease-in-out left-0 top-0
           ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
           <ServerSidebar
@@ -395,13 +395,13 @@ export default function Dashboard() {
         {/* Overlay for mobile when sidebar is open */}
         {showLeftSidebar && (
           <div 
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+            className="absolute inset-0 bg-black/50 z-30 lg:hidden"
             onClick={() => setShowLeftSidebar(false)}
           />
         )}
         
         {/* Main Content Area */}
-        <PixelPanel className="flex-1 flex flex-col w-full h-full rounded-2xl shadow-lg border border-vyre-border">
+        <PixelPanel className="flex-1 flex flex-col w-full h-full lg:rounded-2xl rounded-none lg:shadow-lg shadow-none lg:border border-none border-vyre-border">
         {!selectedServer && !selectedFriend ? (
           // Home page when no server and no friend selected
           <HeroInteraction>
@@ -447,7 +447,7 @@ export default function Dashboard() {
       {/* Right Overlay */}
       {showRightSidebar && (
         <div 
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="absolute inset-0 bg-black/50 z-30 lg:hidden"
           onClick={() => setShowRightSidebar(false)}
         />
       )}
@@ -455,12 +455,12 @@ export default function Dashboard() {
       {/* Right sidebar */}
       <div 
         className={`
-          absolute lg:relative right-0 z-40 h-full w-[85vw] max-w-[288px] lg:w-72 flex flex-col gap-4 transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
+          absolute lg:relative right-0 top-0 z-40 h-full w-[85vw] max-w-[288px] lg:w-72 flex flex-col lg:gap-4 transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
           ${showRightSidebar ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
         `}
       >
         {/* Upper Card: Friends / Members */}
-        <PixelPanel className="flex-1 flex flex-col p-4 rounded-2xl border border-vyre-border shadow-lg overflow-hidden animate-fade-in">
+        <PixelPanel className="flex-1 flex flex-col p-3 lg:p-4 rounded-none lg:rounded-2xl border-none lg:border border-vyre-border shadow-none lg:shadow-lg overflow-hidden animate-fade-in bg-vyre-card">
           {!selectedServer ? (
             // ----- HOME PAGE: Friends + Pending Requests -----
             <>
@@ -601,7 +601,7 @@ export default function Dashboard() {
       {/* Mobile Profile Drawer Overlay */}
       {showMobileProfile && (
         <div 
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="absolute inset-0 bg-black/50 z-30 lg:hidden"
           onClick={() => setShowMobileProfile(false)}
         />
       )}
@@ -609,11 +609,11 @@ export default function Dashboard() {
       {/* Mobile Profile Drawer */}
       <div 
         className={`
-          absolute right-0 z-40 h-full w-[85vw] max-w-[288px] flex flex-col p-4 transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden
+          absolute right-0 top-0 z-40 h-full w-[85vw] max-w-[288px] flex flex-col transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:hidden
           ${showMobileProfile ? 'translate-x-0' : 'translate-x-full'}
         `}
       >
-        <PixelPanel className="flex-1 p-6 rounded-2xl border border-vyre-border shadow-lg animate-fade-in flex flex-col relative overflow-hidden">
+        <PixelPanel className="flex-1 p-6 rounded-none lg:rounded-2xl border-none lg:border border-vyre-border shadow-none lg:shadow-lg animate-fade-in flex flex-col relative overflow-hidden bg-vyre-card">
           <div className="absolute inset-0 bg-vyre-accent/5 pointer-events-none" />
           
           <h2 className="font-pixel text-[11px] text-vyre-muted uppercase tracking-widest mb-6">Account</h2>

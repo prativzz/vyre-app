@@ -186,7 +186,7 @@ export default function ChannelList({
   const voiceChannels = channels.filter(c => c.type === 'voice');
 
   return (
-    <PixelPanel className="w-72 lg:w-64 max-w-[85vw] flex-shrink-0 p-3 flex flex-col h-full border-r border-vyre-border lg:border-none shadow-lg lg:shadow-none">
+    <PixelPanel className="w-72 lg:w-64 max-w-[85vw] flex-shrink-0 p-3 flex flex-col h-full border-r lg:border border-vyre-border lg:border-none shadow-none lg:shadow-none rounded-none lg:rounded-2xl">
       <div className="flex items-center justify-between mb-4 px-2 min-h-[44px] flex-shrink-0">
         <span className="text-sm font-bold text-vyre-text truncate mr-2 font-pixel">{serverName || 'Server'}</span>
         <div className="flex items-center space-x-1">

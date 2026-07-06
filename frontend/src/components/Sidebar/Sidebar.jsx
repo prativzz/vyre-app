@@ -46,7 +46,7 @@ export default function Sidebar({
   };
 
   return (
-    <div className="w-20 h-full bg-vyre-card rounded-2xl flex flex-col items-center border border-vyre-border overflow-hidden flex-shrink-0 shadow-lg relative z-40">
+    <div className="w-20 h-full bg-vyre-card lg:rounded-2xl rounded-none flex flex-col items-center lg:border border-r border-vyre-border overflow-hidden flex-shrink-0 shadow-none lg:shadow-lg relative z-40">
       <BottomMenu
         activeNav={activeNav}
         onNavigate={handleNavigate}
