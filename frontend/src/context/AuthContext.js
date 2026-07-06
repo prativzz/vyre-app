@@ -10,6 +10,8 @@ export function AuthProvider({ children }) {
   const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
+    const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
     const waitForBackend = async () => {
       let isAlive = false;
       let attempt = 0;
@@ -20,7 +22,8 @@ export function AuthProvider({ children }) {
         } catch (err) {
           attempt++;
           console.log(`⏳ Backend asleep, waiting... (Attempt ${attempt})`);
-          await new Promise(r => setTimeout(r, Math.min(1000 * Math.pow(1.5, attempt), 10000)));
+          const delay = Math.min(1000 * Math.pow(1.5, attempt), 10000);
+          await wait(delay);
         }
       }
     };
