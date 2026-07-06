@@ -43,7 +43,7 @@ export default function Modal({ isOpen, onClose, children }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="w-full max-w-md p-6 bg-vyre-card rounded-2xl border border-vyre-border shadow-lg text-vyre-text relative overflow-hidden"
+            className="w-[92vw] sm:w-full max-w-md p-6 bg-vyre-card rounded-2xl border border-vyre-border shadow-lg text-vyre-text relative overflow-hidden"
           >
             <div className="relative z-10">
               {children}
