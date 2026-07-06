@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { AnimatePresence } from 'framer-motion';
 import PixelLoader from './components/ui/PixelLoader';
 import Login from './pages/Login';
 import Register from './pages/Register';
