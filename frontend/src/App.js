@@ -12,7 +12,7 @@ function PrivateRoute({ children }) {
   
   if (!isAppReady) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-vyre-dark text-vyre-text relative overflow-hidden">
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-vyre-bg text-vyre-text relative overflow-hidden">
         <PixelBackground />
         <motion.div 
           initial={{ opacity: 0.5, scale: 0.95 }}
@@ -20,8 +20,8 @@ function PrivateRoute({ children }) {
           transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
           className="z-10 flex flex-col items-center gap-6"
         >
-          <div className="w-16 h-16 border-4 border-vyre-primary border-t-transparent rounded-full animate-spin"></div>
-          <p className="font-pixel text-vyre-primary text-xl tracking-widest uppercase">Waking Server...</p>
+          <div className="w-16 h-16 border-4 border-vyre-accent border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-pixel text-vyre-accent text-xl tracking-widest uppercase">Waking Server...</p>
         </motion.div>
       </div>
     );
