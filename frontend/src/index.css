@@ -33,6 +33,21 @@ body {
   background: #10B981; /* vyre.accent */
 }
 
+/* Custom Scrollbar for Friends Panel */
+.friends-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.friends-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.friends-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(44, 200, 140, 0.25);
+  border-radius: 4px;
+}
+.friends-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(44, 200, 140, 0.45);
+}
+
 /* Common Input Style */
 .input-minimal {
   display: block;

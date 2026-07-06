@@ -438,126 +438,126 @@ export default function Dashboard() {
       )}
 
       {/* Right sidebar */}
-      <PixelPanel 
+      <div 
         className={`
-          absolute lg:relative right-0 z-40 h-full w-72 flex flex-col overflow-y-auto transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
+          absolute lg:relative right-0 z-40 h-full w-72 flex flex-col gap-4 transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
           ${showRightSidebar ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
-          rounded-2xl border-vyre-border shadow-lg
         `}
       >
-        <div className="p-4 flex flex-col h-full">
-        {!selectedServer ? (
-
-          // ----- HOME PAGE: Friends + Pending Requests -----
-          <>
-            <div className="mb-3">
-              <h3 className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest">
-                Friends — {friends.length} ({friendsOnline} online)
-              </h3>
-            </div>
-            <div className="space-y-1 mb-4 flex-1 overflow-y-auto">
-              {friends.map(f => (
-                <div 
-                  key={f.friend_id} 
-                  onClick={() => { handleSelectServer(null); setSelectedFriend(f); }}
-                  className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group cursor-pointer border border-transparent hover:border-vyre-border"
-                >
-                  <div className="flex items-center space-x-3">
-                    <span className={`w-2 h-2 rounded-[2px] shadow-sm ${f.online ? 'bg-vyre-accent' : 'bg-vyre-border'}`}></span>
-                    <span className="text-sm font-medium text-vyre-text group-hover:text-white transition-colors">{f.display_name || f.username}</span>
-                  </div>
-                  <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleSelectServer(null); setSelectedFriend(f); }}
-                      className="p-1.5 rounded text-vyre-muted hover:text-vyre-accent hover:bg-vyre-accent/10 transition-colors"
-                      title="Message"
-                    >
-                      <MessageSquare size={14} />
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); removeFriend(f.friend_id); }}
-                      className="p-1.5 rounded text-vyre-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                      title="Remove Friend"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {friends.length === 0 && <p className="text-xs text-gray-500 px-2">No friends yet.</p>}
-            </div>
-
-            {pendingRequests.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest mb-3 mt-6">Friend Requests</h3>
-                <div className="space-y-1">
-                  {pendingRequests.map(p => (
-                    <div key={p.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-vyre-secondary border border-vyre-border">
-                      <span className="text-sm font-medium text-vyre-text">{p.display_name || p.username}</span>
-                      <div className="flex space-x-1">
-                        <button
-                          onClick={() => acceptFriendRequest(p.id)}
-                          className="font-pixel text-[9px] uppercase tracking-wider bg-vyre-accent/10 text-vyre-accent hover:bg-vyre-accent hover:text-[#111] px-2 py-1 rounded transition-colors"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => declineFriendRequest(p.id)}
-                          className="font-pixel text-[9px] uppercase tracking-wider bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-2 py-1 rounded transition-colors"
-                        >
-                          Decline
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        {/* Upper Card: Friends / Members */}
+        <PixelPanel className="flex-1 flex flex-col p-4 rounded-2xl border border-vyre-border shadow-lg overflow-hidden animate-fade-in">
+          {!selectedServer ? (
+            // ----- HOME PAGE: Friends + Pending Requests -----
+            <>
+              <div className="mb-3">
+                <h3 className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest">
+                  Friends — {friends.length} ({friendsOnline} online)
+                </h3>
               </div>
-            )}
-          </>
-        ) : (
-          // ----- INSIDE A SERVER: Show Server Members -----
-          <>
-            <div className="mb-3">
-              <h3 className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest">
-                Members — {members.length} ({onlineCount} online)
-              </h3>
-            </div>
-            <div className="space-y-1 overflow-y-auto flex-1">
-              {members.map(m => (
-                <div key={m.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-vyre-secondary transition group">
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <div className="w-8 h-8 rounded-xl bg-vyre-secondary flex items-center justify-center text-sm font-pixel font-bold shadow-sm overflow-hidden text-vyre-muted">
-                        {m.avatar ? (
-                          <img src={m.avatar} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                        ) : (
-                          <span>{(m.display_name || m.username)[0].toUpperCase()}</span>
-                        )}
-                      </div>
-                      <span className={`absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-[2px] border-2 border-vyre-card ${m.online ? 'bg-vyre-accent' : 'bg-vyre-border'}`}></span>
+              <div className="space-y-1 mb-4 flex-1 overflow-y-auto friends-scrollbar pr-1">
+                {friends.map(f => (
+                  <div 
+                    key={f.friend_id} 
+                    onClick={() => { handleSelectServer(null); setSelectedFriend(f); }}
+                    className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group cursor-pointer border border-transparent hover:border-vyre-border hover:-translate-y-[2px] hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(44,200,140,0.05)]"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className={`w-2 h-2 rounded-[2px] shadow-sm ${f.online ? 'bg-vyre-accent' : 'bg-vyre-border'}`}></span>
+                      <span className="text-sm font-medium text-vyre-text group-hover:text-white transition-colors">{f.display_name || f.username}</span>
                     </div>
-                    <div>
-                      <div className="text-sm font-medium text-vyre-text">{m.display_name || m.username}</div>
-                      {m.status && <div className="text-xs text-gray-400">{m.status}</div>}
+                    <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleSelectServer(null); setSelectedFriend(f); }}
+                        className="p-1.5 rounded text-vyre-muted hover:text-vyre-accent hover:bg-vyre-accent/10 transition-colors"
+                        title="Message"
+                      >
+                        <MessageSquare size={14} />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); removeFriend(f.friend_id); }}
+                        className="p-1.5 rounded text-vyre-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                        title="Remove Friend"
+                      >
+                        ✕
+                      </button>
                     </div>
                   </div>
-                  {m.online && m.id !== currentUser?.id && (
-                    <button
-                      onClick={() => setDirectCallTarget({ id: m.id, username: m.username, isIncoming: false })}
-                      className="text-xs rounded-full bg-blue-600 hover:bg-blue-500 transition shadow-md opacity-0 group-hover:opacity-100 px-2 py-0.5"
-                    >
-                      Call
-                    </button>
-                  )}
-                </div>
-              ))}
-              {members.length === 0 && <p className="text-gray-500 text-sm text-center mt-4">No members</p>}
-            </div>
-          </>
-        )}
+                ))}
+                {friends.length === 0 && <p className="text-xs text-gray-500 px-2">No friends yet.</p>}
 
-        {/* Profile & Logout (always visible at bottom) */}
-        <div className="mt-4 border-t border-vyre-border pt-4 flex-shrink-0">
+                {pendingRequests.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest mb-3">Friend Requests</h3>
+                    <div className="space-y-1">
+                      {pendingRequests.map(p => (
+                        <div key={p.id} className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-vyre-secondary border border-vyre-border">
+                          <span className="text-sm font-medium text-vyre-text">{p.display_name || p.username}</span>
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => acceptFriendRequest(p.id)}
+                              className="font-pixel text-[9px] uppercase tracking-wider bg-vyre-accent/10 text-vyre-accent hover:bg-vyre-accent hover:text-[#111] px-2 py-1 rounded transition-colors"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => declineFriendRequest(p.id)}
+                              className="font-pixel text-[9px] uppercase tracking-wider bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-2 py-1 rounded transition-colors"
+                            >
+                              Decline
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            // ----- INSIDE A SERVER: Show Server Members -----
+            <>
+              <div className="mb-3">
+                <h3 className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest">
+                  Members — {members.length} ({onlineCount} online)
+                </h3>
+              </div>
+              <div className="space-y-1 overflow-y-auto flex-1 friends-scrollbar pr-1">
+                {members.map(m => (
+                  <div key={m.id} className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group border border-transparent hover:border-vyre-border hover:-translate-y-[2px] hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(44,200,140,0.05)]">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <div className="w-8 h-8 rounded-xl bg-vyre-secondary flex items-center justify-center text-sm font-pixel font-bold shadow-sm overflow-hidden text-vyre-muted">
+                          {m.avatar ? (
+                            <img src={m.avatar} alt="avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          ) : (
+                            <span>{(m.display_name || m.username)[0].toUpperCase()}</span>
+                          )}
+                        </div>
+                        <span className={`absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-[2px] border-2 border-vyre-card ${m.online ? 'bg-vyre-accent' : 'bg-vyre-border'}`}></span>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-vyre-text">{m.display_name || m.username}</div>
+                        {m.status && <div className="text-xs text-gray-400">{m.status}</div>}
+                      </div>
+                    </div>
+                    {m.online && m.id !== currentUser?.id && (
+                      <button
+                        onClick={() => setDirectCallTarget({ id: m.id, username: m.username, isIncoming: false })}
+                        className="text-xs rounded-full bg-blue-600 hover:bg-blue-500 transition shadow-md opacity-0 group-hover:opacity-100 px-2 py-0.5"
+                      >
+                        Call
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {members.length === 0 && <p className="text-gray-500 text-sm text-center mt-4">No members</p>}
+              </div>
+            </>
+          )}
+        </PixelPanel>
+
+        {/* Lower Card: Profile & Logout */}
+        <PixelPanel className="flex-shrink-0 p-4 rounded-2xl border border-vyre-border shadow-lg animate-fade-in flex flex-col">
           <div
             onClick={() => setShowProfileModal(true)}
             className="flex items-center space-x-3 p-2 rounded-xl bg-vyre-secondary hover:bg-vyre-border cursor-pointer transition-colors"
@@ -570,19 +570,18 @@ export default function Dashboard() {
             </div>
             <div className="flex-1">
               <div className="font-medium text-vyre-text text-sm">{currentUser?.display_name || currentUser?.username}</div>
-              <div className="text-[11px] text-vyre-accent font-pixel tracking-wider uppercase mt-0.5">{currentUser?.status || "Online"}</div>
+              <div className="text-[11px] text-vyre-accent font-pixel tracking-wider uppercase mt-0.5 animate-pulse">{currentUser?.status || "Online"}</div>
             </div>
-            <div className="text-vyre-muted text-sm font-pixel hover:text-vyre-text">✎</div>
+            <div className="text-vyre-muted text-sm font-pixel hover:text-vyre-text hover:drop-shadow-[0_0_8px_rgba(44,200,140,0.5)] transition-all">✎</div>
           </div>
           <button
             onClick={logout}
-            className="mt-3 w-full py-2 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-sm font-medium transition-all"
+            className="mt-3 w-full py-2 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-sm font-medium transition-all duration-300 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)]"
           >
             Logout
           </button>
-        </div>
-        </div>
-      </PixelPanel>
+        </PixelPanel>
+      </div>
 
       {showProfileModal && (
         <ProfileModal
