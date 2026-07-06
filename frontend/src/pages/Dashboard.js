@@ -491,7 +491,7 @@ export default function Dashboard() {
                 {friends.map(f => (
                   <div 
                     key={f.friend_id} 
-                    onClick={() => { handleSelectServer(null); setSelectedFriend(f); }}
+                    onClick={() => { handleSelectServer(null); setSelectedFriend(f); setShowRightSidebar(false); }}
                     className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group cursor-pointer border border-transparent hover:border-vyre-border hover:-translate-y-[2px] hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(44,200,140,0.05)]"
                   >
                     <div className="flex items-center space-x-3">
@@ -500,7 +500,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleSelectServer(null); setSelectedFriend(f); }}
+                        onClick={(e) => { e.stopPropagation(); handleSelectServer(null); setSelectedFriend(f); setShowRightSidebar(false); }}
                         className="p-1.5 rounded text-vyre-muted hover:text-vyre-accent hover:bg-vyre-accent/10 transition-colors"
                         title="Message"
                       >
