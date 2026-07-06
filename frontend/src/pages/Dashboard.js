@@ -10,7 +10,7 @@ import DirectMessages from '../components/DirectMessages';
 import ProfileModal from '../components/ProfileModal';
 import CreateServerModal from '../components/CreateServerModal';
 import HeroInteraction from '../components/ui/HeroInteraction';
-import { MessageSquare, Menu, Users, X, UserCircle } from 'lucide-react';
+import { Menu, Users, X, UserCircle } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelPanel from '../components/ui/PixelPanel';
 
