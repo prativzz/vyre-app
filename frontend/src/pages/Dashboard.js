@@ -12,8 +12,8 @@ import CreateServerModal from '../components/CreateServerModal';
 import HeroInteraction from '../components/ui/HeroInteraction';
 import { Menu, Users, X, UserCircle } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
+import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
-import { motion } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -332,20 +332,7 @@ export default function Dashboard() {
   const friendsOnline = friends.filter(f => f.online).length;
 
   if (!isDataLoaded || !currentUser) {
-    return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-vyre-bg text-vyre-text relative overflow-hidden">
-        <PixelBackground />
-        <motion.div 
-          initial={{ opacity: 0.5, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
-          className="z-10 flex flex-col items-center gap-6"
-        >
-          <div className="w-16 h-16 border-4 border-vyre-accent border-t-transparent rounded-full animate-spin"></div>
-          <p className="font-pixel text-vyre-accent text-xl tracking-widest uppercase">Loading Interface...</p>
-        </motion.div>
-      </div>
-    );
+    return <PixelLoader />;
   }
 
   return (

@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { AnimatePresence, motion } from 'framer-motion';
-import PixelBackground from './components/layout/PixelBackground';
+import PixelLoader from './components/ui/PixelLoader';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import CompleteAccount from './pages/CompleteAccount';
@@ -11,20 +10,7 @@ function PrivateRoute({ children }) {
   const { token, isAppReady } = useAuth();
   
   if (!isAppReady) {
-    return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-vyre-bg text-vyre-text relative overflow-hidden">
-        <PixelBackground />
-        <motion.div 
-          initial={{ opacity: 0.5, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
-          className="z-10 flex flex-col items-center gap-6"
-        >
-          <div className="w-16 h-16 border-4 border-vyre-accent border-t-transparent rounded-full animate-spin"></div>
-          <p className="font-pixel text-vyre-accent text-xl tracking-widest uppercase">Waking Server...</p>
-        </motion.div>
-      </div>
-    );
+    return <PixelLoader />;
   }
 
   return token ? children : <Navigate to="/login" />;
