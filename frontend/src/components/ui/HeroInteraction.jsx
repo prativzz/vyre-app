@@ -126,7 +126,7 @@ export default function HeroInteraction({ children }) {
           const dy = s.y - hex.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           
-          if (dist + hex.noise < 75) { // Increased radius for a more generous, smoother activation area
+          if (dist + hex.noise < 55) { // Reduced radius to show fewer hexagons, keeping the smooth trail
             isNearCursor = true;
           }
         }
