@@ -15,8 +15,8 @@ export default function HeroInteraction({ children }) {
   const contentRef = useRef(null);
 
   const state = useRef({
-    x: 0,
-    y: 0,
+    x: -1000,
+    y: -1000,
     isHovering: false,
     hexes: [],
     width: 0,
@@ -172,7 +172,12 @@ export default function HeroInteraction({ children }) {
     state.current.y = e.clientY - rect.top;
   };
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = (e) => {
+    if (containerRef.current && e) {
+      const rect = containerRef.current.getBoundingClientRect();
+      state.current.x = e.clientX - rect.left;
+      state.current.y = e.clientY - rect.top;
+    }
     state.current.isHovering = true;
   };
 
