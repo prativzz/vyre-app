@@ -7,10 +7,27 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [user, setUser] = useState(null);
+  const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
+    const waitForBackend = async () => {
+      let isAlive = false;
+      let attempt = 0;
+      while (!isAlive) {
+        try {
+          const res = await axios.get(`${API_URL}/health`, { timeout: 5000 });
+          if (res.status === 200) isAlive = true;
+        } catch (err) {
+          attempt++;
+          console.log(`⏳ Backend asleep, waiting... (Attempt ${attempt})`);
+          await new Promise(r => setTimeout(r, Math.min(1000 * Math.pow(1.5, attempt), 10000)));
+        }
+      }
+    };
+
     const fetchUser = async () => {
       if (token) {
+        await waitForBackend();
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
           const res = await axios.get(`${API_URL}/user/${payload.userId}/profile`, {
@@ -21,9 +38,12 @@ export function AuthProvider({ children }) {
           console.error("Failed to fetch user profile", err);
           setToken(null);
           localStorage.removeItem('token');
+        } finally {
+          setIsAppReady(true);
         }
       } else {
         setUser(null);
+        setIsAppReady(true);
       }
     };
     fetchUser();
@@ -143,7 +163,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, register, logout, changePassword, deleteAccount, googleLogin, completeGoogleOnboarding }}>
+    <AuthContext.Provider value={{ token, user, isAppReady, login, register, logout, changePassword, deleteAccount, googleLogin, completeGoogleOnboarding }}>
       {children}
     </AuthContext.Provider>
   );

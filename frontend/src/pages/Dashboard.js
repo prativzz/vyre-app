@@ -53,6 +53,7 @@ export default function Dashboard() {
       const res = await fetch(`${API_URL}/servers/${serverId}/channels`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (!res.ok) throw new Error('Failed to fetch channels');
       const data = await res.json();
       // Prevent race condition: ignore if user switched servers during fetch
       if (currentServerIdRef.current !== serverId) return;
@@ -74,6 +75,7 @@ export default function Dashboard() {
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (!res.ok) throw new Error('Failed to fetch members');
       const data = await res.json();
       
       // Prevent race condition: ignore if user switched servers during fetch
@@ -94,6 +96,7 @@ export default function Dashboard() {
       const res = await fetch(`${API_URL}/friends`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (!res.ok) throw new Error('Failed to fetch friends');
       const data = await res.json();
       setFriends(data);
     } catch (err) {
@@ -106,6 +109,7 @@ export default function Dashboard() {
       const res = await fetch(`${API_URL}/friends/pending`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (!res.ok) throw new Error('Failed to fetch pending requests');
       const data = await res.json();
       setPendingRequests(data);
     } catch (err) {
@@ -113,11 +117,27 @@ export default function Dashboard() {
     }
   }, [token]);
 
+  const fetchServers = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/user/servers`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch servers');
+      const data = await res.json();
+      setServers(data);
+    } catch (err) {
+      console.error('Failed to fetch servers:', err);
+    }
+  }, [token]);
+
   const refreshAll = useCallback(() => {
-    fetchFriends();
-    fetchMembers();
-    fetchPendingRequests();
-  }, [fetchFriends, fetchMembers, fetchPendingRequests]);
+    Promise.all([
+      fetchServers(),
+      fetchFriends(),
+      fetchMembers(),
+      fetchPendingRequests()
+    ]).catch(err => console.error("Error refreshing data:", err));
+  }, [fetchServers, fetchFriends, fetchMembers, fetchPendingRequests]);
 
   const startRetry = useCallback(() => {
     if (retryTimerRef.current) {
@@ -142,11 +162,8 @@ export default function Dashboard() {
 
   // Initial data fetch
   useEffect(() => {
-    fetch(`${API_URL}/user/servers`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).then(res => res.json()).then(setServers);
     refreshAll();
-  }, [token, refreshAll]);
+  }, [refreshAll]);
 
   useEffect(() => {
     setCurrentUser(user);
@@ -160,13 +177,7 @@ export default function Dashboard() {
     fetchMembers();
   }, [selectedServer, socket, token, fetchChannels, fetchMembers]);
 
-  // Normal polling (every 5 seconds)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshAll();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [refreshAll]);
+  // Normal polling removed in favor of Socket events and reliable initial load.
 
   // Socket reconnect -> start retry loop
   useEffect(() => {
