@@ -314,7 +314,13 @@ export default function Dashboard() {
       {/* Mobile Header (visible only on small screens) */}
       <div className="lg:hidden flex-none flex items-center justify-between p-3 bg-vyre-card border-b border-vyre-border w-full z-30 h-[60px] relative">
         <button 
-          onClick={() => setShowLeftSidebar(!showLeftSidebar)}
+          onClick={() => {
+            setShowLeftSidebar(!showLeftSidebar);
+            if (!showLeftSidebar) {
+              setShowRightSidebar(false);
+              setShowMobileProfile(false);
+            }
+          }}
           className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
         >
           {showLeftSidebar ? <X size={20} /> : <Menu size={20} />}
@@ -324,13 +330,25 @@ export default function Dashboard() {
         </div>
         <div className="flex gap-2">
           <button 
-            onClick={() => setShowRightSidebar(!showRightSidebar)}
+            onClick={() => {
+              setShowRightSidebar(!showRightSidebar);
+              if (!showRightSidebar) {
+                setShowLeftSidebar(false);
+                setShowMobileProfile(false);
+              }
+            }}
             className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
           >
             {showRightSidebar ? <X size={20} /> : <Users size={20} />}
           </button>
           <button 
-            onClick={() => setShowMobileProfile(!showMobileProfile)}
+            onClick={() => {
+              setShowMobileProfile(!showMobileProfile);
+              if (!showMobileProfile) {
+                setShowLeftSidebar(false);
+                setShowRightSidebar(false);
+              }
+            }}
             className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
           >
             {showMobileProfile ? <X size={20} /> : (
