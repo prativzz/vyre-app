@@ -195,7 +195,7 @@ export default function HeroInteraction({ children }) {
     >
       <canvas 
         ref={canvasRef}
-        className="absolute inset-0 pointer-events-none z-0"
+        className="absolute inset-0 pointer-events-none z-0 hidden md:block"
         style={{ width: '100%', height: '100%' }}
       />
       <div className="relative z-10 flex flex-1 items-center justify-center">
