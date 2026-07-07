@@ -463,7 +463,11 @@ export default function Dashboard() {
         
         {/* Render VoiceVideoChannel independently so it stays mounted when navigating to text channels */}
         {activeVoiceChannel && (
-          <div className={`absolute inset-0 z-20 bg-vyre-bg ${selectedChannel && selectedChannel.type === 'text' ? 'hidden' : 'block'}`}>
+          <div className={`transition-all duration-300 z-50 ${
+            selectedChannel && selectedChannel.type === 'text' 
+              ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent pointer-events-none'
+              : 'absolute inset-0 z-20 bg-vyre-bg'
+          }`}>
             <VoiceVideoChannel
               key={activeVoiceChannel.id}
               channel={activeVoiceChannel}
@@ -476,6 +480,7 @@ export default function Dashboard() {
                   setSelectedChannel(null);
                 }
               }}
+              isMinimized={selectedChannel && selectedChannel.type === 'text'}
             />
           </div>
         )}

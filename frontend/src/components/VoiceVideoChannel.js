@@ -334,7 +334,7 @@ function ParticipantWrapper({ participant, styleClass }) {
   );
 }
 
-function VideoGrid() {
+function VideoGrid({ isMinimized }) {
   const participants = useParticipants();
   const count = participants.length;
   
@@ -365,8 +365,8 @@ function VideoGrid() {
   };
 
   return (
-    <div className="absolute inset-0 p-2 lg:p-6 pb-28 lg:pb-32 flex items-center justify-center">
-      <div className={`grid w-full h-full max-w-[1800px] mx-auto gap-2 lg:gap-4 ${getGridClasses(count)}`}>
+    <div className={`absolute inset-0 flex items-center justify-center ${isMinimized ? 'p-0' : 'p-2 lg:p-6 pb-28 lg:pb-32'}`}>
+      <div className={`grid w-full h-full max-w-[1800px] mx-auto ${isMinimized ? 'gap-0' : 'gap-2 lg:gap-4'} ${getGridClasses(count)}`}>
         <AnimatePresence mode="popLayout">
           {participants.map((p, i) => (
             <ParticipantWrapper key={p.identity} participant={p} styleClass={getItemClass(count, i)} />
@@ -382,7 +382,7 @@ function VideoGrid() {
   );
 }
 
-export default function VoiceVideoChannel({ channel, serverId, token, onLeave }) {
+export default function VoiceVideoChannel({ channel, serverId, token, onLeave, isMinimized }) {
   const [livekitToken, setLivekitToken] = useState('');
   const [error, setError] = useState(null);
 
@@ -438,18 +438,22 @@ export default function VoiceVideoChannel({ channel, serverId, token, onLeave })
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#111315] relative overflow-hidden">
+    <div className={`h-full flex flex-col relative overflow-hidden ${isMinimized ? 'bg-transparent' : 'bg-[#111315]'}`}>
       {/* Premium Ambient Background */}
-      <div className="absolute inset-0 opacity-30 z-0 pointer-events-none">
-        <PixelBackground />
-      </div>
-
-      <div className="absolute top-0 left-0 w-full p-6 z-10 pointer-events-none flex items-center gap-4">
-        <div className="px-4 py-2 bg-[#181B1F]/80 backdrop-blur-md rounded-xl border border-white/5 shadow-lg flex items-center gap-3">
-          <div className="w-2 h-2 bg-vyre-accent rounded-sm shadow-[0_0_8px_#20C997]" />
-          <span className="font-bold tracking-wide text-sm text-white/90">{channel.name}</span>
+      {!isMinimized && (
+        <div className="absolute inset-0 opacity-30 z-0 pointer-events-none">
+          <PixelBackground />
         </div>
-      </div>
+      )}
+
+      {!isMinimized && (
+        <div className="absolute top-0 left-0 w-full p-6 z-10 pointer-events-none flex items-center gap-4">
+          <div className="px-4 py-2 bg-[#181B1F]/80 backdrop-blur-md rounded-xl border border-white/5 shadow-lg flex items-center gap-3">
+            <div className="w-2 h-2 bg-vyre-accent rounded-sm shadow-[0_0_8px_#20C997]" />
+            <span className="font-bold tracking-wide text-sm text-white/90">{channel.name}</span>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 w-full h-full relative z-10">
         <LiveKitRoom
@@ -464,8 +468,8 @@ export default function VoiceVideoChannel({ channel, serverId, token, onLeave })
         >
           <LayoutContextProvider>
             <RoomAudioRenderer />
-            <VideoGrid />
-            <CustomDock onLeave={onLeave} />
+            <VideoGrid isMinimized={isMinimized} />
+            {!isMinimized && <CustomDock onLeave={onLeave} />}
           </LayoutContextProvider>
         </LiveKitRoom>
       </div>
