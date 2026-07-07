@@ -711,7 +711,7 @@ app.put('/api/friends/accept', async (req, res) => {
       ['accepted', friendId, decoded.userId]
     );
     await db.run(
-      'INSERT OR IGNORE INTO friends (user_id, friend_id, status) VALUES (?, ?, ?)',
+      'INSERT INTO friends (user_id, friend_id, status) VALUES (?, ?, ?) ON CONFLICT (user_id, friend_id) DO NOTHING',
       [decoded.userId, friendId, 'accepted']
     );
 
