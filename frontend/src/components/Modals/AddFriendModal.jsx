@@ -71,7 +71,7 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
       const data = await res.json();
       if (res.ok) {
         onRefresh(); // refresh friends list
-        onClose();
+        // Note: intentionally not calling onClose() here so user can send more requests
         setSelectedUser(null);
         setSearchQuery('');
       } else {
