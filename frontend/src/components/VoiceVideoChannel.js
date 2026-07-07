@@ -243,9 +243,9 @@ function ParticipantWrapper({ participant, styleClass }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ type: "spring", damping: 20, stiffness: 200 }}
-      className={styleClass || 'w-full h-full p-2'}
+      className={`relative w-full h-full ${styleClass || ''}`}
     >
-      <div className="relative w-full h-full rounded-3xl overflow-hidden bg-[#181B1F] border border-white/5 shadow-[0_4px_24px_rgba(0,0,0,0.2)] group">
+      <div className="relative w-full h-full rounded-3xl overflow-hidden bg-[#181B1F] border border-white/5 shadow-[0_4px_24px_rgba(0,0,0,0.2)] group" style={{ isolation: 'isolate', transform: 'translateZ(0)' }}>
       <div className="absolute inset-0 rounded-3xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none z-30" />
       
       {/* Speaking Border Pulse */}
@@ -278,10 +278,10 @@ function ParticipantWrapper({ participant, styleClass }) {
         )}
       </AnimatePresence>
 
-      <ParticipantTile trackRef={trackRef} className="w-full h-full [&_.lk-participant-placeholder]:hidden [&_.lk-participant-metadata]:hidden [&_.lk-focus-toggle-button]:hidden [&_.lk-focus-toggle]:hidden [&_.lk-connection-quality]:hidden [&_.lk-participant-name]:hidden relative z-0 object-cover" />
+      <ParticipantTile trackRef={trackRef} className="w-full h-full [&_video]:rounded-3xl [&_video]:object-cover [&_video]:w-full [&_video]:h-full [&_.lk-participant-placeholder]:hidden [&_.lk-participant-metadata]:hidden [&_.lk-focus-toggle-button]:hidden [&_.lk-focus-toggle]:hidden [&_.lk-connection-quality]:hidden [&_.lk-participant-name]:hidden relative z-0" />
       
       {isCamMuted && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111315]/95 z-10 backdrop-blur-md">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111315]/95 z-10 backdrop-blur-md rounded-3xl">
           <motion.div 
             initial={{ scale: 0.9, opacity: 0, y: 10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -338,27 +338,42 @@ function VideoGrid() {
   const participants = useParticipants();
   const count = participants.length;
   
-  const getParticipantClass = (count, index) => {
+  const getGridClasses = (count) => {
     switch(count) {
-      case 1: return "w-full h-full p-2";
-      case 2: return "w-full h-1/2 lg:w-1/2 lg:h-full p-2";
-      case 3: return "w-1/2 h-1/2 p-2";
-      case 4: return "w-1/2 h-1/2 p-2";
-      case 5: return index < 3 ? "w-1/3 h-1/2 p-2" : "w-1/2 h-1/2 p-2";
-      default: return "w-1/3 h-1/3 p-2";
+      case 1: return "grid-cols-1 grid-rows-1";
+      case 2: return "grid-cols-1 grid-rows-2 lg:grid-cols-2 lg:grid-rows-1";
+      case 3: return "grid-cols-1 grid-rows-3 lg:grid-cols-2 lg:grid-rows-2";
+      case 4: return "grid-cols-2 grid-rows-2";
+      case 5: return "grid-cols-2 grid-rows-3 lg:grid-cols-6 lg:grid-rows-2";
+      case 6: return "grid-cols-2 grid-rows-3 lg:grid-cols-3 lg:grid-rows-2";
+      default: return "grid-cols-2 lg:grid-cols-3"; 
     }
   };
 
+  const getItemClass = (count, index) => {
+    if (count === 3 && index === 2) {
+      return "lg:col-span-2 lg:w-1/2 lg:place-self-center"; 
+    }
+    if (count === 5) {
+      let classes = "";
+      if (index === 4) classes = "col-span-2 w-1/2 place-self-center lg:col-span-3 lg:w-full lg:place-self-auto";
+      else if (index >= 3) classes = "lg:col-span-3";
+      else classes = "lg:col-span-2";
+      return classes;
+    }
+    return "";
+  };
+
   return (
-    <div className="absolute inset-0 flex items-center justify-center p-2 lg:p-6 pb-28 lg:pb-32">
-      <div className="flex flex-wrap justify-center content-center h-full w-full max-w-[1800px] mx-auto">
+    <div className="absolute inset-0 p-2 lg:p-6 pb-28 lg:pb-32 flex items-center justify-center">
+      <div className={`grid w-full h-full max-w-[1800px] mx-auto gap-2 lg:gap-4 ${getGridClasses(count)}`}>
         <AnimatePresence mode="popLayout">
           {participants.map((p, i) => (
-            <ParticipantWrapper key={p.identity} participant={p} styleClass={getParticipantClass(count, i)} />
+            <ParticipantWrapper key={p.identity} participant={p} styleClass={getItemClass(count, i)} />
           ))}
         </AnimatePresence>
         {participants.length === 0 && (
-          <div className="w-full flex flex-col items-center justify-center text-vyre-muted opacity-50 h-full">
+          <div className="col-span-full row-span-full flex flex-col items-center justify-center text-vyre-muted opacity-50 h-full w-full">
             <span className="font-pixel text-[11px] tracking-widest uppercase">Waiting for others to join...</span>
           </div>
         )}
