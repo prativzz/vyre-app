@@ -199,18 +199,26 @@ export default function Dashboard() {
       console.log('🔄 Socket reconnected – starting retry loop...');
       startRetry();
     };
+    
+    // Real-time friend updates
+    const onFriendUpdate = () => {
+      fetchFriends();
+      fetchPendingRequests();
+    };
+
     socket.on('connect', onReconnect);
     socket.on('reconnect', onReconnect);
+    socket.on('friend:update', onFriendUpdate);
+    
     return () => {
       socket.off('connect', onReconnect);
       socket.off('reconnect', onReconnect);
+      socket.off('friend:update', onFriendUpdate);
       if (retryTimerRef.current) {
         clearTimeout(retryTimerRef.current);
       }
     };
-  }, [socket, startRetry]);
-
-
+  }, [socket, startRetry, fetchFriends, fetchPendingRequests]);
 
   const handleSelectServer = (server) => {
     if (selectedServer?.id !== server?.id) {

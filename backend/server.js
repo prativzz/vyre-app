@@ -675,6 +675,13 @@ app.post('/api/friends/request', async (req, res) => {
       'INSERT INTO friends (user_id, friend_id, status) VALUES (?, ?, ?)',
       [decoded.userId, friendId, 'pending']
     );
+
+    // Notify the receiver in real-time
+    const targetSocketId = userSocketMap[friendId];
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('friend:update');
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error('❌ Send friend request error:', err);
@@ -707,6 +714,13 @@ app.put('/api/friends/accept', async (req, res) => {
       'INSERT OR IGNORE INTO friends (user_id, friend_id, status) VALUES (?, ?, ?)',
       [decoded.userId, friendId, 'accepted']
     );
+
+    // Notify the sender that we accepted
+    const targetSocketId = userSocketMap[friendId];
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('friend:update');
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error('❌ Accept friend error:', err);
@@ -729,6 +743,13 @@ app.delete('/api/friends/decline', async (req, res) => {
       'DELETE FROM friends WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)',
       [decoded.userId, friendId, friendId, decoded.userId]
     );
+
+    // Notify the other person just in case
+    const targetSocketId = userSocketMap[friendId];
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('friend:update');
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error('❌ Decline/remove friend error:', err);
