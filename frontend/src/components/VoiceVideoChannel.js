@@ -278,7 +278,7 @@ function ParticipantWrapper({ participant, styleClass }) {
         )}
       </AnimatePresence>
 
-      <ParticipantTile trackRef={trackRef} className="w-full h-full [&>.lk-participant-placeholder]:opacity-0 relative z-0 object-cover" />
+      <ParticipantTile trackRef={trackRef} className="w-full h-full [&_.lk-participant-placeholder]:hidden [&_.lk-participant-metadata]:hidden [&_.lk-focus-toggle-button]:hidden [&_.lk-focus-toggle]:hidden [&_.lk-connection-quality]:hidden [&_.lk-participant-name]:hidden relative z-0 object-cover" />
       
       {isCamMuted && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111315]/95 z-10 backdrop-blur-md">
