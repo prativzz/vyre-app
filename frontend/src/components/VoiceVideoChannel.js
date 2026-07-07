@@ -6,7 +6,8 @@ import {
   ParticipantTile,
   useParticipants,
   useIsSpeaking,
-  useLocalParticipant
+  useLocalParticipant,
+  RoomAudioRenderer
 } from '@livekit/components-react';
 import { Track, ParticipantEvent } from 'livekit-client';
 import '@livekit/components-styles';
@@ -184,7 +185,7 @@ function CustomDock({ onLeave }) {
   );
 }
 
-function ParticipantWrapper({ participant }) {
+function ParticipantWrapper({ participant, styleClass }) {
   const [isMicMuted, setIsMicMuted] = useState(!participant.isMicrophoneEnabled);
   const [isCamMuted, setIsCamMuted] = useState(!participant.isCameraEnabled);
   const [avatar, setAvatar] = useState(null);
@@ -242,8 +243,9 @@ function ParticipantWrapper({ participant }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ type: "spring", damping: 20, stiffness: 200 }}
-      className="relative rounded-3xl overflow-hidden h-full min-h-[250px] bg-[#181B1F] border border-white/5 shadow-[0_4px_24px_rgba(0,0,0,0.2)] group"
+      className={styleClass || 'w-full h-full p-2'}
     >
+      <div className="relative w-full h-full rounded-3xl overflow-hidden bg-[#181B1F] border border-white/5 shadow-[0_4px_24px_rgba(0,0,0,0.2)] group">
       <div className="absolute inset-0 rounded-3xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] pointer-events-none z-30" />
       
       {/* Speaking Border Pulse */}
@@ -327,6 +329,7 @@ function ParticipantWrapper({ participant }) {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </motion.div>
   );
 }
@@ -335,29 +338,27 @@ function VideoGrid() {
   const participants = useParticipants();
   const count = participants.length;
   
-  let cols = 1;
-  if (count === 1) cols = 1;
-  else if (count <= 4) cols = 2;
-  else if (count <= 6) cols = 3;
-  else cols = 4;
-
-  const colClasses = {
-    1: 'grid-cols-1',
-    2: 'grid-cols-2',
-    3: 'grid-cols-3',
-    4: 'grid-cols-4',
+  const getParticipantClass = (count, index) => {
+    switch(count) {
+      case 1: return "w-full h-full p-2";
+      case 2: return "w-full h-1/2 lg:w-1/2 lg:h-full p-2";
+      case 3: return "w-1/2 h-1/2 p-2";
+      case 4: return "w-1/2 h-1/2 p-2";
+      case 5: return index < 3 ? "w-1/3 h-1/2 p-2" : "w-1/2 h-1/2 p-2";
+      default: return "w-1/3 h-1/3 p-2";
+    }
   };
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center p-8 pb-32">
-      <div className={`grid ${colClasses[cols]} gap-6 h-full w-full max-w-[1800px] mx-auto`}>
+    <div className="absolute inset-0 flex items-center justify-center p-2 lg:p-6 pb-28 lg:pb-32">
+      <div className="flex flex-wrap justify-center content-center h-full w-full max-w-[1800px] mx-auto">
         <AnimatePresence mode="popLayout">
-          {participants.map((p) => (
-            <ParticipantWrapper key={p.identity} participant={p} />
+          {participants.map((p, i) => (
+            <ParticipantWrapper key={p.identity} participant={p} styleClass={getParticipantClass(count, i)} />
           ))}
         </AnimatePresence>
         {participants.length === 0 && (
-          <div className="col-span-full flex flex-col items-center justify-center text-vyre-muted opacity-50 h-full">
+          <div className="w-full flex flex-col items-center justify-center text-vyre-muted opacity-50 h-full">
             <span className="font-pixel text-[11px] tracking-widest uppercase">Waiting for others to join...</span>
           </div>
         )}
@@ -447,6 +448,7 @@ export default function VoiceVideoChannel({ channel, serverId, token, onLeave })
           onDisconnected={handleDisconnected}
         >
           <LayoutContextProvider>
+            <RoomAudioRenderer />
             <VideoGrid />
             <CustomDock onLeave={onLeave} />
           </LayoutContextProvider>

@@ -365,9 +365,12 @@ export default function Dashboard() {
                 setShowMobileProfile(false);
               }
             }}
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-vyre-muted hover:text-vyre-text bg-vyre-secondary rounded-lg relative"
           >
             {showRightSidebar ? <X size={20} /> : <Users size={20} />}
+            {!showRightSidebar && pendingRequests.filter(p => p.type === 'received').length > 0 && (
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-vyre-accent rounded-full border-2 border-vyre-secondary"></span>
+            )}
           </button>
           <button 
             onClick={() => {
