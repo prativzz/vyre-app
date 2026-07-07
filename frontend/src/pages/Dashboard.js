@@ -433,7 +433,6 @@ export default function Dashboard() {
           onSelectChannel={(ch) => {
             setSelectedChannel(ch);
             if (ch && ch.type === 'voice') setActiveVoiceChannel(ch);
-            else setActiveVoiceChannel(null);
             setShowLeftSidebar(false);
           }}
           serverName={selectedServer.name}
@@ -460,7 +459,27 @@ export default function Dashboard() {
         )}
         
         {/* Main Content Area */}
-        <PixelPanel className="flex-1 flex flex-col w-full h-full lg:rounded-2xl rounded-none lg:shadow-lg shadow-none lg:border border-none border-vyre-border">
+        <PixelPanel className="flex-1 flex flex-col w-full h-full lg:rounded-2xl rounded-none lg:shadow-lg shadow-none lg:border border-none border-vyre-border relative overflow-hidden">
+        
+        {/* Render VoiceVideoChannel independently so it stays mounted when navigating to text channels */}
+        {activeVoiceChannel && (
+          <div className={`absolute inset-0 z-20 bg-vyre-bg ${selectedChannel && selectedChannel.type === 'text' ? 'hidden' : 'block'}`}>
+            <VoiceVideoChannel
+              key={activeVoiceChannel.id}
+              channel={activeVoiceChannel}
+              serverId={selectedServer.id}
+              token={token}
+              socket={socket}
+              onLeave={() => {
+                setActiveVoiceChannel(null);
+                if (selectedChannel?.id === activeVoiceChannel.id) {
+                  setSelectedChannel(null);
+                }
+              }}
+            />
+          </div>
+        )}
+
         {!selectedServer && !selectedFriend ? (
           // Home page when no server and no friend selected
           <HeroInteraction>
@@ -485,22 +504,11 @@ export default function Dashboard() {
             socket={socket} 
             user={currentUser}
           />
-        ) : activeVoiceChannel ? (
-          <VoiceVideoChannel
-            channel={activeVoiceChannel}
-            serverId={selectedServer.id}
-            token={token}
-            socket={socket}
-            onLeave={() => {
-              setActiveVoiceChannel(null);
-              setSelectedChannel(null);
-            }}
-          />
-        ) : (
+        ) : (!activeVoiceChannel) ? (
           <div className="flex items-center justify-center h-full text-gray-500 text-lg font-medium">
             Select a channel to start chatting
           </div>
-        )}
+        ) : null}
         </PixelPanel>
 
       {/* Right Overlay */}
