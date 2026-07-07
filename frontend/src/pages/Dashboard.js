@@ -541,11 +541,11 @@ export default function Dashboard() {
                 ))}
                 {friends.length === 0 && <p className="text-xs text-gray-500 px-2">No friends yet.</p>}
 
-                {pendingRequests.length > 0 && (
+                {pendingRequests.filter(p => p.type === 'received').length > 0 && (
                   <div className="mt-4">
                     <h3 className="font-pixel text-[10px] text-vyre-muted uppercase tracking-widest mb-3">Friend Requests</h3>
                     <div className="space-y-1">
-                      {pendingRequests.map(p => (
+                      {pendingRequests.filter(p => p.type === 'received').map(p => (
                         <div key={p.id} className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-vyre-secondary border border-vyre-border">
                           <span className="text-sm font-medium text-vyre-text">{p.display_name || p.username}</span>
                           <div className="flex space-x-1">

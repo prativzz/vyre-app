@@ -52,7 +52,10 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
   // Check if user is already friend or pending
   const getStatus = (userId) => {
     if (friends.some(f => f.friend_id === userId)) return 'friend';
-    if (pendingRequests.some(p => p.id === userId)) return 'pending';
+    const pending = pendingRequests.find(p => p.id === userId);
+    if (pending) {
+       return pending.type === 'sent' ? 'sent' : 'received';
+    }
     return null;
   };
 
@@ -67,7 +70,6 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
       });
       const data = await res.json();
       if (res.ok) {
-        alert(`Friend request sent to ${selectedUser.display_name || selectedUser.username}!`);
         onRefresh(); // refresh friends list
         onClose();
         setSelectedUser(null);
@@ -133,8 +135,11 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
                   {status === 'friend' && (
                     <span className="text-xs text-vyre-muted font-pixel uppercase">✓ Friend</span>
                   )}
-                  {status === 'pending' && (
-                    <span className="text-xs text-vyre-accent font-pixel uppercase">Pending</span>
+                  {status === 'received' && (
+                    <span className="text-xs text-vyre-accent font-pixel uppercase">Pending (Review)</span>
+                  )}
+                  {status === 'sent' && (
+                    <span className="text-xs text-vyre-muted font-pixel uppercase">Request Sent</span>
                   )}
                   {!status && selectedUser?.id === user.id && (
                     <span className="text-vyre-accent text-sm font-pixel">✓ Selected</span>

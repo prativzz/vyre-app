@@ -792,11 +792,16 @@ app.get('/api/friends/pending', async (req, res) => {
     if (!decoded) return res.status(401).json({ error: 'Invalid token' });
 
     const pending = await db.all(`
-      SELECT u.id, u.username, u.display_name, u.avatar
+      SELECT u.id, u.username, u.display_name, u.avatar, 'received' as type
       FROM friends f
       JOIN users u ON f.user_id = u.id
       WHERE f.friend_id = ? AND f.status = 'pending'
-    `, [decoded.userId]);
+      UNION ALL
+      SELECT u.id, u.username, u.display_name, u.avatar, 'sent' as type
+      FROM friends f
+      JOIN users u ON f.friend_id = u.id
+      WHERE f.user_id = ? AND f.status = 'pending'
+    `, [decoded.userId, decoded.userId]);
 
     res.json(pending);
   } catch (err) {
