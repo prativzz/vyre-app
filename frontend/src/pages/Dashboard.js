@@ -607,14 +607,6 @@ export default function Dashboard() {
                         {m.status && <div className="text-xs text-gray-400">{m.status}</div>}
                       </div>
                     </div>
-                    {m.online && m.id !== currentUser?.id && (
-                      <button
-                        onClick={() => setDirectCallTarget({ id: m.id, username: m.username, isIncoming: false })}
-                        className="text-xs rounded-full bg-blue-600 hover:bg-blue-500 transition shadow-md opacity-0 group-hover:opacity-100 px-2 py-0.5"
-                      >
-                        Call
-                      </button>
-                    )}
                   </div>
                 ))}
                 {members.length === 0 && <p className="text-gray-500 text-sm text-center mt-4">No members</p>}
