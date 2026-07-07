@@ -42,7 +42,9 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
   console.log(`✅ User ${socket.username} (${socket.userId}) connected`);
-  userSocketMap[socket.userId] = socket.id;
+  socket.join(socket.userId);
+  if (!userSocketMap[socket.userId]) userSocketMap[socket.userId] = new Set();
+  userSocketMap[socket.userId].add(socket.id);
 
   socket.on('join:server', async (serverId) => {
     socket.join(`server:${serverId}`);
@@ -121,11 +123,8 @@ io.on('connection', (socket) => {
         reply_content: replyData?.content || null
       };
 
-      const targetSocketId = userSocketMap[targetUserId];
-      if (targetSocketId) {
-        io.to(targetSocketId).emit('dm:new', message);
-      }
-      socket.emit('dm:new', message);
+      io.to(targetUserId).emit('dm:new', message);
+      io.to(socket.userId).emit('dm:new', message);
     } catch (err) {
       console.error('❌ DM send error:', err);
     }
@@ -136,11 +135,8 @@ io.on('connection', (socket) => {
       const msg = await db.get('SELECT sender_id FROM direct_messages WHERE id = ?', [messageId]);
       if (msg && msg.sender_id === socket.userId) {
         await db.run('DELETE FROM direct_messages WHERE id = ?', [messageId]);
-        const targetSocketId = userSocketMap[targetUserId];
-        if (targetSocketId) {
-          io.to(targetSocketId).emit('dm:deleted', { messageId, targetUserId: socket.userId });
-        }
-        socket.emit('dm:deleted', { messageId, targetUserId });
+        io.to(targetUserId).emit('dm:deleted', { messageId, targetUserId: socket.userId });
+        io.to(socket.userId).emit('dm:deleted', { messageId, targetUserId });
       }
     } catch (err) {
       console.error('❌ DM delete error:', err);
@@ -148,7 +144,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    delete userSocketMap[socket.userId];
+    if (userSocketMap[socket.userId]) {
+      userSocketMap[socket.userId].delete(socket.id);
+      if (userSocketMap[socket.userId].size === 0) {
+        delete userSocketMap[socket.userId];
+      }
+    }
     console.log(`❌ User ${socket.username} (${socket.userId}) disconnected`);
   });
 });
@@ -677,10 +678,7 @@ app.post('/api/friends/request', async (req, res) => {
     );
 
     // Notify the receiver in real-time
-    const targetSocketId = userSocketMap[friendId];
-    if (targetSocketId) {
-      io.to(targetSocketId).emit('friend:update');
-    }
+    io.to(friendId).emit('friend:update');
 
     res.json({ success: true });
   } catch (err) {
@@ -716,10 +714,7 @@ app.put('/api/friends/accept', async (req, res) => {
     );
 
     // Notify the sender that we accepted
-    const targetSocketId = userSocketMap[friendId];
-    if (targetSocketId) {
-      io.to(targetSocketId).emit('friend:update');
-    }
+    io.to(friendId).emit('friend:update');
 
     res.json({ success: true });
   } catch (err) {
@@ -745,10 +740,7 @@ app.delete('/api/friends/decline', async (req, res) => {
     );
 
     // Notify the other person just in case
-    const targetSocketId = userSocketMap[friendId];
-    if (targetSocketId) {
-      io.to(targetSocketId).emit('friend:update');
-    }
+    io.to(friendId).emit('friend:update');
 
     res.json({ success: true });
   } catch (err) {
