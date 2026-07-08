@@ -338,7 +338,18 @@ function VideoGrid({ isMinimized }) {
   const participants = useParticipants();
   const count = participants.length;
   
-  const getGridClasses = (count) => {
+  const getGridClasses = (count, isMinimized) => {
+    if (isMinimized) {
+      switch(count) {
+        case 1: return "grid-cols-1 grid-rows-1";
+        case 2: return "grid-cols-2 grid-rows-1";
+        case 3: return "grid-cols-2 grid-rows-2";
+        case 4: return "grid-cols-2 grid-rows-2";
+        case 5: return "grid-cols-3 grid-rows-2";
+        case 6: return "grid-cols-3 grid-rows-2";
+        default: return "grid-cols-2 grid-rows-2"; 
+      }
+    }
     switch(count) {
       case 1: return "grid-cols-1 grid-rows-1";
       case 2: return "grid-cols-1 grid-rows-2 lg:grid-cols-2 lg:grid-rows-1";
@@ -350,7 +361,11 @@ function VideoGrid({ isMinimized }) {
     }
   };
 
-  const getItemClass = (count, index) => {
+  const getItemClass = (count, index, isMinimized) => {
+    if (isMinimized) {
+      if (count === 3 && index === 2) return "col-span-2 w-1/2 place-self-center";
+      return "";
+    }
     if (count === 3 && index === 2) {
       return "lg:col-span-2 lg:w-1/2 lg:place-self-center"; 
     }
@@ -366,10 +381,10 @@ function VideoGrid({ isMinimized }) {
 
   return (
     <div className={`absolute inset-0 flex items-center justify-center ${isMinimized ? 'p-0' : 'p-2 lg:p-6 pb-28 lg:pb-32'}`}>
-      <div className={`grid w-full h-full max-w-[1800px] mx-auto ${isMinimized ? 'gap-0' : 'gap-2 lg:gap-4'} ${getGridClasses(count)}`}>
+      <div className={`grid w-full h-full max-w-[1800px] mx-auto ${isMinimized ? 'gap-0' : 'gap-2 lg:gap-4'} ${getGridClasses(count, isMinimized)}`}>
         <AnimatePresence mode="popLayout">
           {participants.map((p, i) => (
-            <ParticipantWrapper key={p.identity} participant={p} styleClass={getItemClass(count, i)} />
+            <ParticipantWrapper key={p.identity} participant={p} styleClass={getItemClass(count, i, isMinimized)} />
           ))}
         </AnimatePresence>
         {participants.length === 0 && (
