@@ -463,9 +463,9 @@ export default function Dashboard() {
         
         {/* Render VoiceVideoChannel independently so it stays mounted when navigating to text channels */}
         {activeVoiceChannel && (
-          <div className={`transition-all duration-300 z-50 ${
+          <div className={`transition-all duration-300 ${
             selectedChannel && selectedChannel.type === 'text' 
-              ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent pointer-events-none'
+              ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent pointer-events-none z-50'
               : 'absolute inset-0 z-20 bg-vyre-bg'
           }`}>
             <VoiceVideoChannel
