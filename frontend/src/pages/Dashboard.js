@@ -14,7 +14,7 @@ import { Menu, Users, X, UserCircle, Maximize2 } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
-import { motion, useMotionValue, animate } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -43,16 +43,7 @@ export default function Dashboard() {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const dashboardRef = useRef(null);
   
-  const dragX = useMotionValue(0);
-  const dragY = useMotionValue(0);
   const isMinimized = selectedChannel && selectedChannel.type === 'text';
-
-  useEffect(() => {
-    if (!isMinimized) {
-      animate(dragX, 0, { duration: 0.5, ease: [0.2, 0.8, 0.2, 1] });
-      animate(dragY, 0, { duration: 0.5, ease: [0.2, 0.8, 0.2, 1] });
-    }
-  }, [isMinimized, dragX, dragY]);
 
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef(null);
@@ -486,16 +477,28 @@ export default function Dashboard() {
             dragConstraints={dashboardRef}
             dragMomentum={false}
             dragElastic={0}
-            className={`absolute z-20 overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
+            className={`absolute z-20 overflow-hidden ${
               isMinimized 
-                ? 'w-64 h-40 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent z-50 cursor-move'
-                : 'w-full h-full bg-vyre-bg lg:rounded-2xl inset-0'
+                ? 'rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent z-50 cursor-move'
+                : 'bg-vyre-bg lg:rounded-2xl'
             }`}
             style={{
               top: isMinimized ? 'calc(100% - 160px - 16px)' : '0px',
               left: isMinimized ? 'calc(100% - 256px - 16px)' : '0px',
-              x: dragX,
-              y: dragY
+              width: isMinimized ? '256px' : '100%',
+              height: isMinimized ? '160px' : '100%',
+              transitionProperty: 'width, height, top, left, border-radius',
+              transitionDuration: '500ms',
+              transitionTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)'
+            }}
+            animate={{
+              x: isMinimized ? undefined : 0,
+              y: isMinimized ? undefined : 0
+            }}
+            transition={{
+              type: 'tween',
+              duration: 0.5,
+              ease: [0.2, 0.8, 0.2, 1]
             }}
           >
             {/* Click-catcher & Maximize overlay for PiP mode */}
