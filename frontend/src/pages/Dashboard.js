@@ -141,7 +141,7 @@ export default function Dashboard() {
   }, [token]);
 
   const refreshAll = useCallback(async () => {
-    const results = await Promise.all([
+    await Promise.all([
       fetchServers(),
       fetchFriends(),
       fetchMembers(),
