@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { motion, AnimatePresence } from 'framer-motion';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelPanel from '../components/ui/PixelPanel';
 
@@ -89,8 +88,6 @@ export default function CompleteAccount() {
               onChange={(e) => setUsername(e.target.value)}
               required
             />
-          </div>
-          
           </div>
 
           <button type="submit" className="btn-primary w-full py-3 uppercase tracking-wider font-pixel text-xs mt-4">
