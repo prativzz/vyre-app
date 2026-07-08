@@ -14,7 +14,7 @@ import { Menu, Users, X, UserCircle, Maximize2 } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
-import { motion, useMotionValue } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -43,16 +43,7 @@ export default function Dashboard() {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const dashboardRef = useRef(null);
   
-  const dragX = useMotionValue(0);
-  const dragY = useMotionValue(0);
   const isMinimized = selectedChannel && selectedChannel.type === 'text';
-
-  useEffect(() => {
-    if (!isMinimized) {
-      dragX.set(0);
-      dragY.set(0);
-    }
-  }, [isMinimized, dragX, dragY]);
 
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef(null);
@@ -482,15 +473,16 @@ export default function Dashboard() {
         {/* Render VoiceVideoChannel independently so it stays mounted when navigating to text channels */}
         {activeVoiceChannel && (
           <motion.div 
+            layout
             drag={isMinimized}
             dragConstraints={dashboardRef}
             dragMomentum={false}
             dragElastic={0}
-            style={{
-              x: dragX,
-              y: dragY,
-              transition: 'width 0.3s ease, height 0.3s ease, border-radius 0.3s ease, box-shadow 0.3s ease'
+            animate={{
+              x: isMinimized ? undefined : 0,
+              y: isMinimized ? undefined : 0
             }}
+            transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
             className={`${
               isMinimized 
                 ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent z-50 cursor-move'
