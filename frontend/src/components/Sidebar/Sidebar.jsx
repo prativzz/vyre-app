@@ -19,14 +19,19 @@ export default function Sidebar({
   onRefresh,
   onHome,
 }) {
-  const [activeNav, setActiveNav] = useState('home');
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [showCreateServer, setShowCreateServer] = useState(false);
   const [showJoinServer, setShowJoinServer] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
+  const currentActiveNav = 
+    showAddFriend ? 'add-friend' :
+    showCreateServer ? 'create-server' :
+    showJoinServer ? 'join-server' :
+    showSettings ? 'settings' :
+    selectedServerId ? null : 'home';
+
   const handleNavigate = (id) => {
-    setActiveNav(id);
     if (id === 'home') {
       if (onHome) onHome();
       else onSelectServer(null);
@@ -48,7 +53,7 @@ export default function Sidebar({
   return (
     <div className="w-20 h-full bg-vyre-card lg:rounded-2xl rounded-none flex flex-col items-center lg:border border-r border-vyre-border overflow-hidden flex-shrink-0 shadow-none lg:shadow-lg relative z-40">
       <BottomMenu
-        activeNav={activeNav}
+        activeNav={currentActiveNav}
         onNavigate={handleNavigate}
         onAddFriend={() => setShowAddFriend(true)}
         onCreateServer={() => setShowCreateServer(true)}
