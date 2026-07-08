@@ -14,7 +14,7 @@ import { Menu, Users, X, UserCircle, Maximize2 } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -42,6 +42,17 @@ export default function Dashboard() {
   const [showMobileProfile, setShowMobileProfile] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const dashboardRef = useRef(null);
+  
+  const dragX = useMotionValue(0);
+  const dragY = useMotionValue(0);
+  const isMinimized = selectedChannel && selectedChannel.type === 'text';
+
+  useEffect(() => {
+    if (!isMinimized) {
+      dragX.set(0);
+      dragY.set(0);
+    }
+  }, [isMinimized, dragX, dragY]);
 
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef(null);
@@ -471,25 +482,23 @@ export default function Dashboard() {
         {/* Render VoiceVideoChannel independently so it stays mounted when navigating to text channels */}
         {activeVoiceChannel && (
           <motion.div 
-            drag={selectedChannel && selectedChannel.type === 'text'}
+            drag={isMinimized}
             dragConstraints={dashboardRef}
             dragMomentum={false}
             dragElastic={0}
-            animate={{
-              x: (selectedChannel && selectedChannel.type === 'text') ? undefined : 0,
-              y: (selectedChannel && selectedChannel.type === 'text') ? undefined : 0
-            }}
             style={{
+              x: dragX,
+              y: dragY,
               transition: 'width 0.3s ease, height 0.3s ease, border-radius 0.3s ease, box-shadow 0.3s ease'
             }}
             className={`${
-              selectedChannel && selectedChannel.type === 'text' 
+              isMinimized 
                 ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent z-50 cursor-move'
                 : 'absolute inset-0 z-20 bg-vyre-bg lg:rounded-2xl overflow-hidden'
             }`}
           >
             {/* Click-catcher & Maximize overlay for PiP mode */}
-            {selectedChannel && selectedChannel.type === 'text' && (
+            {isMinimized && (
               <div className="absolute inset-0 z-50 flex items-start justify-end p-2 opacity-100 lg:opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-auto">
                 <div 
                   className="bg-[#181B1F]/90 backdrop-blur-md p-1.5 rounded-lg text-white shadow-lg border border-white/10 flex items-center justify-center cursor-pointer hover:text-vyre-accent hover:bg-white/10 transition-colors"
@@ -514,7 +523,7 @@ export default function Dashboard() {
                   setSelectedChannel(null);
                 }
               }}
-              isMinimized={selectedChannel && selectedChannel.type === 'text'}
+              isMinimized={isMinimized}
             />
           </motion.div>
         )}
