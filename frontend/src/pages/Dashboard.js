@@ -147,9 +147,8 @@ export default function Dashboard() {
       fetchMembers(),
       fetchPendingRequests()
     ]);
-    if (results.every(r => r === true)) {
-      setIsDataLoaded(true);
-    }
+    // Always set isDataLoaded to true so the UI is unblocked even if backend is asleep
+    setIsDataLoaded(true);
   }, [fetchServers, fetchFriends, fetchMembers, fetchPendingRequests]);
 
   const startRetry = useCallback(() => {
