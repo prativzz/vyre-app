@@ -101,7 +101,7 @@ export default function SettingsModal({ isOpen, onClose }) {
             )}
             <input
               type="password"
-              placeholder="New password"
+              placeholder={hasPassword ? "New password" : "Enter password"}
               className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -110,7 +110,7 @@ export default function SettingsModal({ isOpen, onClose }) {
             />
             <input
               type="password"
-              placeholder="Confirm new password"
+              placeholder={hasPassword ? "Confirm new password" : "Confirm password"}
               className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
