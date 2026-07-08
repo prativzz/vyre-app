@@ -31,17 +31,23 @@ export function AuthProvider({ children }) {
 
     const fetchUser = async () => {
       if (token) {
-        await waitForBackend();
         try {
+          // Optimistically load user to prevent infinite loading screen if backend is asleep
           const payload = JSON.parse(atob(token.split('.')[1]));
+          setUser({ id: payload.userId, username: payload.username });
+          setIsAppReady(true);
+
+          await waitForBackend();
           const res = await axios.get(`${API_URL}/user/${payload.userId}/profile`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setUser(res.data);
         } catch (err) {
           console.error("Failed to fetch user profile", err);
-          setToken(null);
-          localStorage.removeItem('token');
+          if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+            setToken(null);
+            localStorage.removeItem('token');
+          }
         } finally {
           setIsAppReady(true);
         }
