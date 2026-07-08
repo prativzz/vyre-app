@@ -37,7 +37,7 @@ export async function registerUser(email, username, password) {
     // Send the email (or mock it)
     const mailResult = await sendOtpEmail(email, otp);
     if (!mailResult.success) {
-      return { success: false, error: mailResult.error };
+      return { success: false, error: 'This email is not real or does not exist' };
     }
 
     return { success: true, pending: true, message: 'OTP sent to email' };

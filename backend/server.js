@@ -175,7 +175,7 @@ app.post('/api/register', async (req, res) => {
   // Validate if email domain is real
   const isValidDomain = await isValidEmailDomain(email);
   if (!isValidDomain) {
-    return res.status(400).json({ error: 'Invalid or fake email address' });
+    return res.status(400).json({ success: false, error: 'This email is not real or does not exist' });
   }
 
   const result = await registerUser(email, username, password);
