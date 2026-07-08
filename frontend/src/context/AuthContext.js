@@ -152,12 +152,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const completeGoogleOnboarding = async (onboardingToken, username, password) => {
+  const completeGoogleOnboarding = async (onboardingToken, username) => {
     try {
       const res = await axios.post(`${API_URL}/auth/complete-google`, {
         onboardingToken,
-        username,
-        password
+        username
       });
       if (res.data.success) {
         setToken(res.data.token);

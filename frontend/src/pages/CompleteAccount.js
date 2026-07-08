@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelPanel from '../components/ui/PixelPanel';
 
@@ -17,9 +17,6 @@ export default function CompleteAccount() {
   const onboardingToken = onboardingData?.onboardingToken || '';
 
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
   // If accessed without valid state, redirect to login
@@ -32,17 +29,8 @@ export default function CompleteAccount() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
 
-    const result = await completeGoogleOnboarding(onboardingToken, username, password);
+    const result = await completeGoogleOnboarding(onboardingToken, username);
     if (result.success) {
       navigate('/');
     } else {
@@ -103,35 +91,6 @@ export default function CompleteAccount() {
             />
           </div>
           
-          <div className="relative w-full">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              className="input-minimal w-full pr-10 font-medium"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-vyre-muted hover:text-vyre-text transition-colors"
-            >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
-
-          <div className="relative w-full">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Confirm Password"
-              className="input-minimal w-full pr-10 font-medium"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-              required
-            />
           </div>
 
           <button type="submit" className="btn-primary w-full py-3 uppercase tracking-wider font-pixel text-xs mt-4">

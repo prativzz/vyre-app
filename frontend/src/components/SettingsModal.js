@@ -1,16 +1,21 @@
 import { API_URL } from '../config';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Modal from './Modals/Modal';
 import AnimatedButton from './ui/AnimatedButton';
 
 export default function SettingsModal({ isOpen, onClose }) {
-  const { token, logout } = useAuth();
+  const { token, logout, user } = useAuth();
+  const [hasPassword, setHasPassword] = useState(user?.hasPassword);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    setHasPassword(user?.hasPassword);
+  }, [user?.hasPassword]);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -28,12 +33,13 @@ export default function SettingsModal({ isOpen, onClose }) {
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage({ type: 'success', text: 'Password updated successfully!' });
+        setMessage({ type: 'success', text: hasPassword ? 'Password updated successfully!' : 'Password set successfully!' });
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
+        setHasPassword(true);
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to change password.' });
+        setMessage({ type: 'error', text: data.error || 'Failed to update password.' });
       }
     } catch (err) {
       setMessage({ type: 'error', text: 'Network error.' });
@@ -78,17 +84,21 @@ export default function SettingsModal({ isOpen, onClose }) {
 
       <form onSubmit={handleChangePassword} className="space-y-4 mb-8">
         <div>
-          <h3 className="text-xs font-pixel uppercase tracking-widest text-vyre-muted mb-3 pb-2 border-b border-vyre-border">Change Password</h3>
+          <h3 className="text-xs font-pixel uppercase tracking-widest text-vyre-muted mb-3 pb-2 border-b border-vyre-border">
+            {hasPassword ? 'Change Password' : 'Set Password'}
+          </h3>
           <div className="space-y-3">
-            <input
-              type="password"
-              placeholder="Current password"
-              className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              required
-              disabled={loading}
-            />
+            {hasPassword && (
+              <input
+                type="password"
+                placeholder="Current password"
+                className="bg-vyre-bg text-vyre-text border border-vyre-border rounded-lg px-4 py-3 focus:border-vyre-accent outline-none w-full text-sm"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+                disabled={loading}
+              />
+            )}
             <input
               type="password"
               placeholder="New password"
@@ -110,7 +120,7 @@ export default function SettingsModal({ isOpen, onClose }) {
           </div>
         </div>
         <AnimatedButton type="submit" variant="primary" className="w-full py-3" disabled={loading}>
-          {loading ? 'Updating...' : 'Update Password'}
+          {loading ? 'Processing...' : (hasPassword ? 'Update Password' : 'Set Password')}
         </AnimatedButton>
       </form>
 

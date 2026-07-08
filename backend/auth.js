@@ -36,7 +36,8 @@ export async function loginUser(email, password) {
       email: user.email,
       display_name: user.display_name || user.username,
       avatar: user.avatar || '',
-      status: user.status || ''
+      status: user.status || '',
+      hasPassword: !!user.password_hash
     }
   };
 }
@@ -77,7 +78,7 @@ export function verifyToken(token) {
   }
 }
 
-export async function completeGoogleUser(onboardingToken, username, password) {
+export async function completeGoogleUser(onboardingToken, username) {
   const decoded = verifyToken(onboardingToken);
   if (!decoded || !decoded.isPending) {
     return { success: false, error: 'Invalid or expired onboarding session' };
@@ -85,13 +86,12 @@ export async function completeGoogleUser(onboardingToken, username, password) {
 
   const { email, name } = decoded;
 
-  const hashed = await bcrypt.hash(password, 10);
   const userId = uuidv4();
   
   try {
     await db.run(
       'INSERT INTO users (id, email, username, display_name, avatar, password_hash) VALUES (?, ?, ?, ?, ?, ?)',
-      [userId, email, username, "", "", hashed]
+      [userId, email, username, "", "", null]
     );
     const user = await db.get('SELECT * FROM users WHERE id = ?', [userId]);
     const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
@@ -105,7 +105,8 @@ export async function completeGoogleUser(onboardingToken, username, password) {
         email: user.email,
         display_name: user.display_name || user.username,
         avatar: user.avatar || '',
-        status: user.status || ''
+        status: user.status || '',
+        hasPassword: !!user.password_hash
       }
     };
   } catch (err) {

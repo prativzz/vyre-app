@@ -202,12 +202,12 @@ app.post('/api/auth/google', async (req, res) => {
 });
 
 app.post('/api/auth/complete-google', async (req, res) => {
-  const { onboardingToken, username, password } = req.body;
-  if (!onboardingToken || !username || !password) {
+  const { onboardingToken, username } = req.body;
+  if (!onboardingToken || !username) {
     return res.status(400).json({ success: false, error: 'Missing fields' });
   }
   try {
-    const result = await completeGoogleUser(onboardingToken, username, password);
+    const result = await completeGoogleUser(onboardingToken, username);
     res.json(result);
   } catch (err) {
     console.error("Complete Google Auth Error:", err);
@@ -453,15 +453,19 @@ app.post('/api/user/profile', async (req, res) => {
     'UPDATE users SET display_name = ?, avatar = ?, status = ? WHERE id = ?',
     [display_name || '', avatar || '', status || '', decoded.userId]
   );
-  const updated = await db.get('SELECT username, display_name, avatar, status FROM users WHERE id = ?', [decoded.userId]);
-  res.json({ success: true, user: updated });
+  const updated = await db.get('SELECT username, display_name, avatar, status, password_hash FROM users WHERE id = ?', [decoded.userId]);
+  const hasPassword = !!updated.password_hash;
+  delete updated.password_hash;
+  res.json({ success: true, user: { ...updated, hasPassword } });
 });
 
 app.get('/api/user/:userId/profile', async (req, res) => {
   const { userId } = req.params;
-  const user = await db.get('SELECT id, username, display_name, avatar, status FROM users WHERE id = ?', [userId]);
+  const user = await db.get('SELECT id, username, display_name, avatar, status, password_hash FROM users WHERE id = ?', [userId]);
   if (!user) return res.status(404).json({ error: 'User not found' });
-  res.json(user);
+  const hasPassword = !!user.password_hash;
+  delete user.password_hash;
+  res.json({ ...user, hasPassword });
 });
 
 app.post('/api/livekit/token', async (req, res) => {
@@ -580,8 +584,8 @@ app.put('/api/user/password', async (req, res) => {
     if (!decoded) return res.status(401).json({ success: false, error: 'Invalid token' });
 
     const { currentPassword, newPassword } = req.body;
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ success: false, error: 'Missing password fields' });
+    if (!newPassword) {
+      return res.status(400).json({ success: false, error: 'Missing new password' });
     }
     if (newPassword.length < 4) {
       return res.status(400).json({ success: false, error: 'New password must be at least 4 characters' });
@@ -590,8 +594,15 @@ app.put('/api/user/password', async (req, res) => {
     const user = await db.get('SELECT * FROM users WHERE id = ?', [decoded.userId]);
     if (!user) return res.status(404).json({ success: false, error: 'User not found' });
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
-    if (!isMatch) return res.status(401).json({ success: false, error: 'Current password is incorrect' });
+    const hasPassword = !!user.password_hash;
+
+    if (hasPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ success: false, error: 'Current password is required' });
+      }
+      const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!isMatch) return res.status(401).json({ success: false, error: 'Current password is incorrect' });
+    }
 
     const hashed = await bcrypt.hash(newPassword, 10);
     await db.run('UPDATE users SET password_hash = ? WHERE id = ?', [hashed, decoded.userId]);
