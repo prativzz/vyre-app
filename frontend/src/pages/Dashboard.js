@@ -41,7 +41,7 @@ export default function Dashboard() {
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [showMobileProfile, setShowMobileProfile] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const mainContentRef = useRef(null);
+  const dashboardRef = useRef(null);
 
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef(null);
@@ -345,7 +345,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-vyre-bg overflow-hidden relative w-full max-w-[1920px] mx-auto">
+    <div ref={dashboardRef} className="flex flex-col h-[100dvh] bg-vyre-bg overflow-hidden relative w-full max-w-[1920px] mx-auto">
       <PixelBackground />
       
       {/* Mobile Header (visible only on small screens) */}
@@ -466,19 +466,26 @@ export default function Dashboard() {
         )}
         
         {/* Main Content Area */}
-        <PixelPanel ref={mainContentRef} className="flex-1 flex flex-col w-full h-full lg:rounded-2xl rounded-none lg:shadow-lg shadow-none lg:border border-none border-vyre-border relative overflow-hidden">
+        <PixelPanel className="flex-1 flex flex-col w-full h-full lg:rounded-2xl rounded-none lg:shadow-lg shadow-none lg:border border-none border-vyre-border relative !overflow-visible">
         
         {/* Render VoiceVideoChannel independently so it stays mounted when navigating to text channels */}
         {activeVoiceChannel && (
           <motion.div 
             drag={selectedChannel && selectedChannel.type === 'text'}
-            dragConstraints={mainContentRef}
+            dragConstraints={dashboardRef}
             dragMomentum={false}
             dragElastic={0}
-            className={`transition-all duration-300 ${
+            animate={{
+              x: (selectedChannel && selectedChannel.type === 'text') ? undefined : 0,
+              y: (selectedChannel && selectedChannel.type === 'text') ? undefined : 0
+            }}
+            style={{
+              transition: 'width 0.3s ease, height 0.3s ease, border-radius 0.3s ease, box-shadow 0.3s ease'
+            }}
+            className={`${
               selectedChannel && selectedChannel.type === 'text' 
                 ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent z-50 cursor-move'
-                : 'absolute inset-0 z-20 bg-vyre-bg'
+                : 'absolute inset-0 z-20 bg-vyre-bg lg:rounded-2xl overflow-hidden'
             }`}
           >
             {/* Click-catcher & Maximize overlay for PiP mode */}
