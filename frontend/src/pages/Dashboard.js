@@ -14,6 +14,7 @@ import { Menu, Users, X, UserCircle, Maximize2 } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
+import { motion } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -40,6 +41,7 @@ export default function Dashboard() {
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [showMobileProfile, setShowMobileProfile] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const mainContentRef = useRef(null);
 
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef(null);
@@ -464,35 +466,31 @@ export default function Dashboard() {
         )}
         
         {/* Main Content Area */}
-        <PixelPanel className="flex-1 flex flex-col w-full h-full lg:rounded-2xl rounded-none lg:shadow-lg shadow-none lg:border border-none border-vyre-border relative overflow-hidden">
+        <PixelPanel ref={mainContentRef} className="flex-1 flex flex-col w-full h-full lg:rounded-2xl rounded-none lg:shadow-lg shadow-none lg:border border-none border-vyre-border relative overflow-hidden">
         
         {/* Render VoiceVideoChannel independently so it stays mounted when navigating to text channels */}
         {activeVoiceChannel && (
-          <div 
-            className={`transition-all duration-300 group ${
+          <motion.div 
+            drag={selectedChannel && selectedChannel.type === 'text'}
+            dragConstraints={mainContentRef}
+            dragMomentum={false}
+            dragElastic={0}
+            className={`transition-all duration-300 ${
               selectedChannel && selectedChannel.type === 'text' 
-                ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent z-50 pointer-events-auto cursor-pointer'
+                ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent z-50 cursor-move'
                 : 'absolute inset-0 z-20 bg-vyre-bg'
             }`}
-            onClickCapture={(e) => {
-              if (selectedChannel && selectedChannel.type === 'text') {
-                e.preventDefault();
-                e.stopPropagation();
-                setSelectedChannel(activeVoiceChannel);
-              }
-            }}
-            onTouchStartCapture={(e) => {
-              if (selectedChannel && selectedChannel.type === 'text') {
-                e.preventDefault();
-                e.stopPropagation();
-                setSelectedChannel(activeVoiceChannel);
-              }
-            }}
           >
             {/* Click-catcher & Maximize overlay for PiP mode */}
             {selectedChannel && selectedChannel.type === 'text' && (
-              <div className="absolute inset-0 z-50 flex items-start justify-end p-2 opacity-100 lg:opacity-0 hover:opacity-100 transition-opacity duration-200">
-                <div className="bg-[#181B1F]/90 backdrop-blur-md p-1.5 rounded-lg text-white shadow-lg border border-white/10 flex items-center justify-center">
+              <div className="absolute inset-0 z-50 flex items-start justify-end p-2 opacity-100 lg:opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-auto">
+                <div 
+                  className="bg-[#181B1F]/90 backdrop-blur-md p-1.5 rounded-lg text-white shadow-lg border border-white/10 flex items-center justify-center cursor-pointer hover:text-vyre-accent hover:bg-white/10 transition-colors"
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    setSelectedChannel(activeVoiceChannel);
+                  }}
+                >
                   <Maximize2 size={16} />
                 </div>
               </div>
@@ -511,7 +509,7 @@ export default function Dashboard() {
               }}
               isMinimized={selectedChannel && selectedChannel.type === 'text'}
             />
-          </div>
+          </motion.div>
         )}
 
         {!selectedServer && !selectedFriend ? (
