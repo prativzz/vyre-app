@@ -45,7 +45,7 @@ export default function Dashboard() {
   
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
-  const isMinimized = selectedChannel && selectedChannel.type === 'text';
+  const isMinimized = activeVoiceChannel && (!selectedChannel || selectedChannel.id !== activeVoiceChannel.id);
 
   useEffect(() => {
     if (!isMinimized) {
@@ -234,11 +234,9 @@ export default function Dashboard() {
 
   const handleSelectServer = (server) => {
     if (selectedServer?.id !== server?.id) {
-      // Clear stale data to prevent flashing old members/channels
       setMembers([]);
       setChannels([]);
       setSelectedChannel(null);
-      setActiveVoiceChannel(null);
       setSelectedServer(server);
     }
   };
@@ -448,7 +446,7 @@ export default function Dashboard() {
                 alert('You are already in a voice channel. Please leave it before joining another.');
                 return;
               }
-              setActiveVoiceChannel(ch);
+              setActiveVoiceChannel({ ...ch, serverId: selectedServer.id });
             }
             setSelectedChannel(ch);
             setShowLeftSidebar(false);
@@ -510,6 +508,10 @@ export default function Dashboard() {
                   className="bg-[#181B1F]/90 backdrop-blur-md p-1.5 rounded-lg text-white shadow-lg border border-white/10 flex items-center justify-center cursor-pointer hover:text-vyre-accent hover:bg-white/10 transition-colors"
                   onPointerDown={(e) => {
                     e.stopPropagation();
+                    if (selectedServer?.id !== activeVoiceChannel.serverId) {
+                      const server = servers.find(s => s.id === activeVoiceChannel.serverId);
+                      if (server) handleSelectServer(server);
+                    }
                     setSelectedChannel(activeVoiceChannel);
                   }}
                 >
@@ -520,7 +522,7 @@ export default function Dashboard() {
             <VoiceVideoChannel
               key={activeVoiceChannel.id}
               channel={activeVoiceChannel}
-              serverId={selectedServer.id}
+              serverId={activeVoiceChannel.serverId || selectedServer?.id}
               token={token}
               socket={socket}
               onLeave={() => {
