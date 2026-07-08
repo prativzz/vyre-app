@@ -453,7 +453,7 @@ export default function VoiceVideoChannel({ channel, serverId, token, onLeave, i
   }
 
   return (
-    <div className={`h-full flex flex-col relative overflow-hidden ${isMinimized ? 'bg-transparent' : 'bg-[#111315]'}`}>
+    <div className={`h-full flex flex-col relative overflow-hidden ${isMinimized ? 'bg-transparent pointer-events-none' : 'bg-[#111315]'}`}>
       {/* Premium Ambient Background */}
       {!isMinimized && (
         <div className="absolute inset-0 opacity-30 z-0 pointer-events-none">
