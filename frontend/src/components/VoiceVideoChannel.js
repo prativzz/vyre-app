@@ -5,6 +5,7 @@ import {
   LayoutContextProvider,
   ParticipantTile,
   useParticipants,
+  useTracks,
   useIsSpeaking,
   useLocalParticipant,
   RoomAudioRenderer
@@ -185,7 +186,8 @@ function CustomDock({ onLeave }) {
   );
 }
 
-function ParticipantWrapper({ participant, styleClass }) {
+function ParticipantWrapper({ trackRef, styleClass }) {
+  const participant = trackRef.participant;
   const [isMicMuted, setIsMicMuted] = useState(!participant.isMicrophoneEnabled);
   const [isCamMuted, setIsCamMuted] = useState(!participant.isCameraEnabled);
   const [avatar, setAvatar] = useState(null);
@@ -227,12 +229,7 @@ function ParticipantWrapper({ participant, styleClass }) {
   const displayName = participant.name || 'Unknown';
   const initial = displayName.charAt(0).toUpperCase();
 
-  const cameraPub = participant.getTrackPublication(Track.Source.Camera);
-  const trackRef = {
-    participant,
-    publication: cameraPub,
-    source: Track.Source.Camera,
-  };
+  const isScreenShare = trackRef.source === Track.Source.ScreenShare;
 
   const isSpeaking = useIsSpeaking(participant);
 
@@ -278,9 +275,9 @@ function ParticipantWrapper({ participant, styleClass }) {
         )}
       </AnimatePresence>
 
-      <ParticipantTile trackRef={trackRef} className="w-full h-full [&_video]:rounded-3xl [&_video]:object-cover [&_video]:w-full [&_video]:h-full [&_.lk-participant-placeholder]:hidden [&_.lk-participant-metadata]:hidden [&_.lk-focus-toggle-button]:hidden [&_.lk-focus-toggle]:hidden [&_.lk-connection-quality]:hidden [&_.lk-participant-name]:hidden relative z-0" />
+      <ParticipantTile trackRef={trackRef} className={`w-full h-full [&_video]:rounded-3xl ${isScreenShare ? '[&_video]:object-contain bg-[#111315]' : '[&_video]:object-cover'} [&_video]:w-full [&_video]:h-full [&_.lk-participant-placeholder]:hidden [&_.lk-participant-metadata]:hidden [&_.lk-focus-toggle-button]:hidden [&_.lk-focus-toggle]:hidden [&_.lk-connection-quality]:hidden [&_.lk-participant-name]:hidden relative z-0`} />
       
-      {isCamMuted && (
+      {(!isScreenShare && isCamMuted) && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#111315]/95 z-10 backdrop-blur-md rounded-3xl">
           <motion.div 
             initial={{ scale: 0.9, opacity: 0, y: 10 }}
@@ -313,7 +310,7 @@ function ParticipantWrapper({ participant, styleClass }) {
       {/* Floating Username Chip */}
       <div className="absolute bottom-4 left-4 bg-[#181B1F]/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-medium text-white/90 flex items-center gap-2 z-30 border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
         <div className="w-1.5 h-1.5 bg-vyre-accent rounded-full shadow-[0_0_4px_rgba(32,201,151,0.5)]" />
-        <span>{isLocal ? 'You' : displayName}</span>
+        <span>{isLocal ? 'You' : displayName}{isScreenShare ? "'s Screen" : ""}</span>
       </div>
 
       {/* Muted Pill */}
@@ -335,8 +332,12 @@ function ParticipantWrapper({ participant, styleClass }) {
 }
 
 function VideoGrid({ isMinimized }) {
+  const tracks = useTracks([
+    { source: Track.Source.Camera, withPlaceholder: true },
+    { source: Track.Source.ScreenShare, withPlaceholder: false },
+  ]);
   const participants = useParticipants();
-  const count = participants.length;
+  const count = tracks.length;
   
   const getGridClasses = (count, isMinimized) => {
     if (isMinimized) {
@@ -383,8 +384,8 @@ function VideoGrid({ isMinimized }) {
     <div className={`absolute inset-0 flex items-center justify-center ${isMinimized ? 'p-0' : 'p-2 lg:p-6 pb-28 lg:pb-32'}`}>
       <div className={`grid w-full h-full max-w-[1800px] mx-auto ${isMinimized ? 'gap-0' : 'gap-2 lg:gap-4'} ${getGridClasses(count, isMinimized)}`}>
         <AnimatePresence mode="popLayout">
-          {participants.map((p, i) => (
-            <ParticipantWrapper key={p.identity} participant={p} styleClass={getItemClass(count, i, isMinimized)} />
+          {tracks.map((t, i) => (
+            <ParticipantWrapper key={`${t.participant.identity}-${t.source}`} trackRef={t} styleClass={getItemClass(count, i, isMinimized)} />
           ))}
         </AnimatePresence>
         {participants.length === 0 && (
