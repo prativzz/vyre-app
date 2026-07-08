@@ -471,15 +471,21 @@ export default function Dashboard() {
           <div 
             className={`transition-all duration-300 ${
               selectedChannel && selectedChannel.type === 'text' 
-                ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent cursor-pointer z-50 pointer-events-auto'
+                ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent z-50 pointer-events-auto'
                 : 'absolute inset-0 z-20 bg-vyre-bg'
             }`}
-            onClick={() => {
-              if (selectedChannel && selectedChannel.type === 'text') {
-                setSelectedChannel(activeVoiceChannel);
-              }
-            }}
           >
+            {/* Click-catcher overlay for PiP mode */}
+            {selectedChannel && selectedChannel.type === 'text' && (
+              <div 
+                className="absolute inset-0 z-50 cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setSelectedChannel(activeVoiceChannel);
+                }}
+              />
+            )}
             <VoiceVideoChannel
               key={activeVoiceChannel.id}
               channel={activeVoiceChannel}
