@@ -489,23 +489,13 @@ export default function Dashboard() {
               }
             }}
           >
-            {/* Maximize Button for PiP mode */}
+            {/* Click-catcher & Maximize overlay for PiP mode */}
             {selectedChannel && selectedChannel.type === 'text' && (
-              <div 
-                className="absolute top-2 right-2 z-[60] bg-[#181B1F]/80 backdrop-blur-md p-1.5 rounded-lg cursor-pointer opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all hover:bg-vyre-accent text-white hover:text-black shadow-lg border border-white/10"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setSelectedChannel(activeVoiceChannel);
-                }}
-              >
-                <Maximize2 size={16} />
+              <div className="absolute inset-0 z-50 flex items-start justify-end p-2 opacity-100 lg:opacity-0 hover:opacity-100 transition-opacity duration-200">
+                <div className="bg-[#181B1F]/90 backdrop-blur-md p-1.5 rounded-lg text-white shadow-lg border border-white/10 flex items-center justify-center">
+                  <Maximize2 size={16} />
+                </div>
               </div>
-            )}
-            
-            {/* Click-catcher overlay for PiP mode */}
-            {selectedChannel && selectedChannel.type === 'text' && (
-              <div className="absolute inset-0 z-50" />
             )}
             <VoiceVideoChannel
               key={activeVoiceChannel.id}
