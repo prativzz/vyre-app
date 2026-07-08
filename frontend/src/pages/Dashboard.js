@@ -10,7 +10,7 @@ import DirectMessages from '../components/DirectMessages';
 import ProfileModal from '../components/ProfileModal';
 import CreateServerModal from '../components/CreateServerModal';
 import HeroInteraction from '../components/ui/HeroInteraction';
-import { Menu, Users, X, UserCircle } from 'lucide-react';
+import { Menu, Users, X, UserCircle, Maximize2 } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
@@ -469,7 +469,7 @@ export default function Dashboard() {
         {/* Render VoiceVideoChannel independently so it stays mounted when navigating to text channels */}
         {activeVoiceChannel && (
           <div 
-            className={`transition-all duration-300 ${
+            className={`transition-all duration-300 group ${
               selectedChannel && selectedChannel.type === 'text' 
                 ? 'absolute bottom-4 right-4 w-64 h-40 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent z-50 pointer-events-auto cursor-pointer'
                 : 'absolute inset-0 z-20 bg-vyre-bg'
@@ -489,6 +489,20 @@ export default function Dashboard() {
               }
             }}
           >
+            {/* Maximize Button for PiP mode */}
+            {selectedChannel && selectedChannel.type === 'text' && (
+              <div 
+                className="absolute top-2 right-2 z-[60] bg-[#181B1F]/80 backdrop-blur-md p-1.5 rounded-lg cursor-pointer opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all hover:bg-vyre-accent text-white hover:text-black shadow-lg border border-white/10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setSelectedChannel(activeVoiceChannel);
+                }}
+              >
+                <Maximize2 size={16} />
+              </div>
+            )}
+            
             {/* Click-catcher overlay for PiP mode */}
             {selectedChannel && selectedChannel.type === 'text' && (
               <div className="absolute inset-0 z-50" />
