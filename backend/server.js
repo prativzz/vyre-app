@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { initializeDb, db } from './db.js';
-import { registerUser, loginUser, verifyToken, googleLoginUser, completeGoogleUser } from './auth.js';
+import { registerUser, loginUser, verifyToken, googleLoginUser, completeGoogleUser, verifyOtp } from './auth.js';
 import dns from 'dns';
 import { promisify } from 'util';
 import { v4 as uuidv4 } from 'uuid';
@@ -180,7 +180,16 @@ app.post('/api/register', async (req, res) => {
 
   const result = await registerUser(email, username, password);
   if (!result.success) return res.status(400).json({ error: result.error });
-  res.json({ success: true, userId: result.userId });
+  res.json({ success: true, pending: true, message: 'OTP sent' });
+});
+
+app.post('/api/verify-otp', async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) return res.status(400).json({ error: 'Missing fields' });
+  
+  const result = await verifyOtp(email, otp);
+  if (!result.success) return res.status(400).json({ error: result.error });
+  res.json(result);
 });
 
 app.post('/api/auth/google', async (req, res) => {

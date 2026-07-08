@@ -95,6 +95,22 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const verifyOtp = async (email, otp) => {
+    try {
+      const res = await axios.post(`${API_URL}/verify-otp`, { email, otp });
+      if (res.data.success) {
+        setToken(res.data.token);
+        setUser(res.data.user);
+        localStorage.setItem('token', res.data.token);
+        return { success: true };
+      }
+      return res.data;
+    } catch (err) {
+      if (err.response) return err.response.data;
+      return { success: false, error: 'Network error' };
+    }
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -172,7 +188,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, isAppReady, login, register, logout, changePassword, deleteAccount, googleLogin, completeGoogleOnboarding }}>
+    <AuthContext.Provider value={{ token, user, isAppReady, login, register, verifyOtp, logout, changePassword, deleteAccount, googleLogin, completeGoogleOnboarding }}>
       {children}
     </AuthContext.Provider>
   );

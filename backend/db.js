@@ -120,6 +120,16 @@ export async function initializeDb() {
     )
   `);
 
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS pending_users (
+      email TEXT PRIMARY KEY,
+      username TEXT UNIQUE,
+      password_hash TEXT,
+      otp TEXT,
+      expires_at TIMESTAMP
+    )
+  `);
+
   // Create a default server if none exists
   const serverCount = await db.get('SELECT COUNT(*) as count FROM servers');
   if (parseInt(serverCount.count, 10) === 0) {
