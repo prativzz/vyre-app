@@ -479,7 +479,9 @@ export default function Dashboard() {
         
         {/* Render VoiceVideoChannel independently so it stays mounted when navigating to text channels */}
         {activeVoiceChannel && (
-          <div className="absolute inset-0 z-20 pointer-events-none rounded-none lg:rounded-2xl overflow-hidden">
+          <div className={`absolute inset-0 pointer-events-none rounded-none lg:rounded-2xl ${
+            isMinimized ? 'z-50 overflow-visible' : 'z-20 overflow-hidden'
+          }`}>
             <motion.div 
               drag={isMinimized}
               dragConstraints={dashboardRef}
