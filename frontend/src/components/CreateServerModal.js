@@ -12,11 +12,14 @@ const TEMPLATES = [
 export default function CreateServerModal({ onClose, onCreate }) {
   const [name, setName] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState('general');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim()) return;
-    onCreate(name, selectedTemplate);
+    if (!name.trim() || isSubmitting) return;
+    setIsSubmitting(true);
+    await onCreate(name, selectedTemplate);
+    setIsSubmitting(false);
   };
 
   return (
@@ -54,8 +57,21 @@ export default function CreateServerModal({ onClose, onCreate }) {
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-4 border-t border-vyre-border pt-6">
-              <button type="button" onClick={onClose} className="btn-secondary font-pixel text-[10px] uppercase tracking-wider py-2 px-4">Cancel</button>
-              <button type="submit" className="btn-primary font-pixel text-[10px] uppercase tracking-wider py-2 px-4">Create</button>
+              <button 
+                type="button" 
+                onClick={onClose} 
+                disabled={isSubmitting}
+                className="btn-secondary font-pixel text-[10px] uppercase tracking-wider py-2 px-4 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="btn-primary font-pixel text-[10px] uppercase tracking-wider py-2 px-4 disabled:opacity-50"
+              >
+                {isSubmitting ? 'Creating...' : 'Create'}
+              </button>
             </div>
           </form>
         </PixelPanel>

@@ -3,11 +3,15 @@ import PixelPanel from './ui/PixelPanel';
 
 export default function CreateChannelModal({ onClose, onCreate, type }) {
   const [name, setName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim()) return;
-    onCreate(name);
+    if (!name.trim() || isSubmitting) return;
+    setIsSubmitting(true);
+    await onCreate(name);
+    // Modal usually unmounts after onCreate succeeds, but in case it fails:
+    setIsSubmitting(false);
   };
 
   return (
@@ -28,15 +32,17 @@ export default function CreateChannelModal({ onClose, onCreate, type }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="btn-secondary font-pixel text-[10px] uppercase tracking-wider py-2 px-4"
+                disabled={isSubmitting}
+                className="btn-secondary font-pixel text-[10px] uppercase tracking-wider py-2 px-4 disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn-primary font-pixel text-[10px] uppercase tracking-wider py-2 px-4"
+                disabled={isSubmitting}
+                className="btn-primary font-pixel text-[10px] uppercase tracking-wider py-2 px-4 disabled:opacity-50"
               >
-                Create
+                {isSubmitting ? 'Creating...' : 'Create'}
               </button>
             </div>
           </form>
