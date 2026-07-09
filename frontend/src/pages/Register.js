@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelPanel from '../components/ui/PixelPanel';
-import PixelLoader from '../components/ui/PixelLoader';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -90,7 +89,6 @@ export default function Register() {
       className="min-h-screen flex items-center justify-center bg-vyre-bg p-4 relative overflow-hidden"
     >
       <PixelBackground />
-      {isLoading && <PixelLoader />}
 
       <PixelPanel className="p-8 w-full max-w-md animate-fade-in relative z-10 flex flex-col items-center">
         <div className="text-center mb-8">
@@ -145,8 +143,8 @@ export default function Register() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              <button type="submit" className="btn-primary w-full py-3 uppercase tracking-wider font-pixel text-xs mt-2">
-                Create Account
+              <button type="submit" disabled={isLoading} className="btn-primary w-full py-3 uppercase tracking-wider font-pixel text-xs mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                {isLoading ? 'Loading...' : 'Create Account'}
               </button>
 
               <div className="flex items-center space-x-3 my-6">
@@ -187,8 +185,8 @@ export default function Register() {
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                 required
               />
-              <button type="submit" className="btn-primary w-full py-3 uppercase tracking-wider font-pixel text-xs mt-2">
-                Verify
+              <button type="submit" disabled={isLoading} className="btn-primary w-full py-3 uppercase tracking-wider font-pixel text-xs mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                {isLoading ? 'Verifying...' : 'Verify'}
               </button>
               <button
                 type="button"
