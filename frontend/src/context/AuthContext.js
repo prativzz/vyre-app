@@ -89,7 +89,12 @@ export function AuthProvider({ children }) {
     try {
       console.log("📝 Registering:", email, username);
       const res = await axios.post(`${API_URL}/register`, { email, username, password });
-      console.log("📦 Register response:", res.data);
+      if (res.data.success) {
+        setToken(res.data.token);
+        setUser(res.data.user);
+        localStorage.setItem('token', res.data.token);
+        return { success: true };
+      }
       return res.data;
     } catch (err) {
       console.error("❌ Register error:", err.message);

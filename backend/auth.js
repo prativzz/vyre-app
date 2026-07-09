@@ -17,40 +17,35 @@ export async function registerUser(email, username, password) {
     return { success: false, error: 'Email or username already exists' };
   }
 
-  // Check if username already exists in pending_users but for a different email
-  const existingPending = await db.get('SELECT email FROM pending_users WHERE username = $1 AND email != $2', [username, email]);
-  if (existingPending) {
-    return { success: false, error: 'Username is currently reserved by another pending registration' };
-  }
-
-  // Generate 6-digit OTP
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60000).toISOString(); // 10 mins
-
   try {
-    // Upsert into pending_users
+    const userId = uuidv4();
     await db.run(
-      `INSERT INTO pending_users (email, username, password_hash, otp, expires_at)
-       VALUES (?, ?, ?, ?, ?)
-       ON CONFLICT(email) DO UPDATE SET 
-         username = excluded.username,
-         password_hash = excluded.password_hash,
-         otp = excluded.otp,
-         expires_at = excluded.expires_at`,
-      [email, username, hashed, otp, expiresAt]
+      `INSERT INTO users (id, email, username, password_hash, display_name)
+       VALUES (?, ?, ?, ?, ?)`,
+      [userId, email, username, hashed, username]
     );
 
-    // Send the email (or mock it)
-    const mailResult = await sendOtpEmail(email, otp);
-    if (!mailResult.success) {
-      console.warn(`⚠️ Failed to send OTP email to ${email}. The user can use the universal bypass code 000000.`);
-      // We don't return an error here so the UI can still advance to the OTP screen for testing!
-    }
+    // Delete any pending registration with this email if it exists (cleanup)
+    await db.run('DELETE FROM pending_users WHERE email = ?', [email]);
 
-    return { success: true, pending: true, message: 'OTP sent to email (or use bypass code)' };
+    const token = jwt.sign({ userId, username }, JWT_SECRET, { expiresIn: '7d' });
+    
+    return {
+      success: true,
+      token,
+      user: {
+        id: userId,
+        username,
+        email,
+        display_name: username,
+        avatar: '',
+        status: '',
+        hasPassword: true
+      }
+    };
   } catch (err) {
     console.error('Registration error:', err);
-    return { success: false, error: 'Failed to initiate registration' };
+    return { success: false, error: 'Failed to complete registration' };
   }
 }
 
