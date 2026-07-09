@@ -565,7 +565,7 @@ export default function Dashboard() {
             user={currentUser}
           />
         ) : (!activeVoiceChannel) ? (
-          <div className="flex items-center justify-center h-full text-gray-500 text-lg font-medium">
+          <div className="flex items-center justify-center h-full text-vyre-muted font-pixel text-sm uppercase tracking-widest text-center px-4">
             Select a channel to start chatting
           </div>
         ) : null}
