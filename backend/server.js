@@ -632,10 +632,6 @@ app.delete('/api/user', async (req, res) => {
 
     const userId = decoded.userId;
     const uniqueSuffix = userId.slice(0, 8);
-
-    await db.run('BEGIN TRANSACTION');
-
-    // 1. Anonymize user with unique suffix
     await db.run(
       `UPDATE users SET 
         username = 'Deleted_User_' || ?,
@@ -660,10 +656,8 @@ app.delete('/api/user', async (req, res) => {
     // 4. Remove from friends table
     await db.run('DELETE FROM friends WHERE user_id = ? OR friend_id = ?', [userId, userId]);
 
-    await db.run('COMMIT');
     res.json({ success: true });
   } catch (err) {
-    try { await db.run('ROLLBACK'); } catch (e) {}
     console.error('❌ Delete account error:', err);
     res.status(500).json({ success: false, error: 'Delete failed: ' + err.message });
   }
