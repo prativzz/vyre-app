@@ -33,7 +33,7 @@ export const sendOtpEmail = async (to, otp) => {
     const mailOptions = {
       from: `"Vyre Accounts" <${process.env.GMAIL_USER}>`,
       to,
-      subject: 'Your Vyre Verification Code',
+      subject: `Your Vyre Verification Code: ${otp}`,
       text: `Welcome to Vyre! Your verification code is: ${otp}. This code expires in 10 minutes.`,
       html: `
         <div style="font-family: monospace; background-color: #0f1115; color: #a1a1aa; padding: 40px; text-align: center;">
