@@ -30,6 +30,9 @@ export function AuthProvider({ children }) {
     };
 
     const fetchUser = async () => {
+      // Start warming up the backend immediately so login/register doesn't hang
+      waitForBackend();
+
       if (token) {
         try {
           // Optimistically load user to prevent infinite loading screen if backend is asleep
@@ -37,7 +40,7 @@ export function AuthProvider({ children }) {
           setUser({ id: payload.userId, username: payload.username });
           setIsAppReady(true);
 
-          await waitForBackend();
+          await waitForBackend(); // Wait for it to finish before fetching profile
           const res = await axios.get(`${API_URL}/user/${payload.userId}/profile`, {
             headers: { Authorization: `Bearer ${token}` }
           });
