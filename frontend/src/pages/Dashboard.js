@@ -596,7 +596,7 @@ export default function Dashboard() {
                   Friends — {friends.length} ({friendsOnline} online)
                 </h3>
               </div>
-              <div className="space-y-1 mb-4 flex-1 overflow-y-auto friends-scrollbar pr-1">
+              <div className="space-y-1 mb-4 flex-1 overflow-y-auto friends-scrollbar pr-1 pt-2">
                 {friends.map(f => (
                   <div 
                     key={f.friend_id} 
@@ -656,7 +656,7 @@ export default function Dashboard() {
                   Members — {members.length} ({onlineCount} online)
                 </h3>
               </div>
-              <div className="space-y-1 overflow-y-auto flex-1 friends-scrollbar pr-1">
+              <div className="space-y-1 overflow-y-auto flex-1 friends-scrollbar pr-1 pt-2">
                 {members.map(m => (
                   <div key={m.id} className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-vyre-secondary transition-all duration-200 group border border-transparent hover:border-vyre-border hover:-translate-y-[2px] hover:scale-[1.01] hover:shadow-[0_4px_12px_rgba(44,200,140,0.05)]">
                     <div className="flex items-center space-x-3">
