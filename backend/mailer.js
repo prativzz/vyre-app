@@ -1,19 +1,32 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      type: 'OAuth2',
+      user: process.env.GMAIL_USER,
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      refreshToken: process.env.GOOGLE_REFRESH_TOKEN
+    }
+  });
+};
 
 export const sendOtpEmail = async (to, otp) => {
   try {
-    // If RESEND_API_KEY is not set, throw an error to enforce config
-    if (!process.env.RESEND_API_KEY) {
-      return { success: false, error: 'RESEND_API_KEY is missing in Render environment variables' };
+    // Check for credentials
+    if (!process.env.GMAIL_USER || !process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_REFRESH_TOKEN) {
+      return { success: false, error: 'Google OAuth credentials missing in Render environment variables' };
     }
 
-    const { data, error } = await resend.emails.send({
-      from: 'Vyre Accounts <onboarding@resend.dev>', // Resend's free testing domain
-      to: [to],
+    const transporter = createTransporter();
+
+    const mailOptions = {
+      from: `"Vyre Accounts" <${process.env.GMAIL_USER}>`,
+      to,
       subject: 'Your Vyre Verification Code',
       text: `Welcome to Vyre! Your verification code is: ${otp}. This code expires in 10 minutes.`,
       html: `
@@ -26,17 +39,13 @@ export const sendOtpEmail = async (to, otp) => {
           <p style="font-size: 12px; color: #71717a;">This code expires in 10 minutes.</p>
         </div>
       `,
-    });
+    };
 
-    if (error) {
-      console.error('Resend API Error:', error);
-      return { success: false, error: error.message };
-    }
-
-    console.log('Message sent via Resend: %s', data.id);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Message sent via Gmail OAuth2: %s', info.messageId);
     return { success: true };
   } catch (err) {
-    console.error('Error sending email via Resend:', err);
-    return { success: false, error: 'Failed to send OTP email' };
+    console.error('Error sending email via Gmail OAuth2:', err);
+    return { success: false, error: err.message || 'Failed to send OTP email' };
   }
 };
