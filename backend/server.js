@@ -178,6 +178,12 @@ app.post('/api/register', async (req, res) => {
   const { email, username, password } = req.body;
   if (!email || !username || !password) return res.status(400).json({ error: 'Missing fields' });
   
+  // Validate if email domain is real
+  const isValidDomain = await isValidEmailDomain(email);
+  if (!isValidDomain) {
+    return res.status(400).json({ success: false, error: 'This email is not real or does not exist' });
+  }
+
   const result = await registerUser(email, username, password);
   if (!result.success) return res.status(400).json({ error: result.error });
   res.json(result);
