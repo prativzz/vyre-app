@@ -160,9 +160,15 @@ async function isValidEmailDomain(email) {
   const domain = email.split('@')[1];
   if (!domain) return false;
   try {
-    const addresses = await resolveMx(domain);
+    const addresses = await Promise.race([
+      resolveMx(domain),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('DNS lookup timed out')), 5000))
+    ]);
     return addresses && addresses.length > 0;
   } catch (err) {
+    // If DNS times out or fails, we default to allowing the email through
+    // so we don't accidentally block valid users.
+    if (err.message === 'DNS lookup timed out') return true;
     return false;
   }
 }
