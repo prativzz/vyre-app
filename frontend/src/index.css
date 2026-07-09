@@ -80,6 +80,10 @@ body {
 }
 
 /* Common Buttons */
+button {
+  font-family: 'Silkscreen', cursive;
+}
+
 .btn-primary {
   background: #10B981; /* vyre.accent */
   color: #111315; /* dark text for contrast */

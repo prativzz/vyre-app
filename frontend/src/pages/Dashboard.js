@@ -703,7 +703,7 @@ export default function Dashboard() {
           </div>
           <button
             onClick={logout}
-            className="mt-3 w-full py-2 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-sm font-medium transition-all duration-300 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)]"
+            className="mt-3 w-full py-2 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-pixel text-[10px] uppercase tracking-wider transition-all duration-300 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)]"
           >
             Logout
           </button>
@@ -763,7 +763,7 @@ export default function Dashboard() {
           <div className="mt-auto relative z-10">
             <button
               onClick={logout}
-              className="w-full py-3.5 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-sm font-medium transition-all shadow-sm"
+              className="w-full py-3 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-pixel text-[11px] uppercase tracking-wider transition-all duration-300"
             >
               Logout
             </button>
