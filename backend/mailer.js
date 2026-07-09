@@ -47,7 +47,10 @@ export const sendOtpEmail = async (to, otp) => {
       `,
     };
 
-    const info = await mailer.sendMail(mailOptions);
+    const info = await Promise.race([
+      mailer.sendMail(mailOptions),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Email sending timed out. Google might be rate-limiting us.')), 8000))
+    ]);
     console.log('Message sent via Gmail OAuth2: %s', info.messageId);
     return { success: true };
   } catch (err) {
