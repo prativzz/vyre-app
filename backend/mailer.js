@@ -30,17 +30,10 @@ export const sendOtpEmail = async (to, otp) => {
   };
 
   try {
-    // If SMTP_USER is not set, we'll just log it to console instead of throwing an error.
-    // This makes it easy to test locally without configuring SMTP.
-    if (!process.env.SMTP_USER) {
-      console.log(`\n========== MOCK EMAIL SENT ==========`);
-      console.log(`To: ${to}`);
-      console.log(`Subject: ${mailOptions.subject}`);
-      console.log(`OTP Code: ${otp}`);
-      console.log(`=====================================\n`);
-      return { success: true, mocked: true };
+    // Enforce SMTP configuration to ensure emails are actually sent
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.SMTP_HOST) {
+      return { success: false, error: 'SMTP credentials missing or misconfigured in Render environment variables' };
     }
-
     const info = await transporter.sendMail(mailOptions);
     console.log('Message sent: %s', info.messageId);
     return { success: true };
