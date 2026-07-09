@@ -2,8 +2,12 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const createTransporter = () => {
-  return nodemailer.createTransport({
+let transporter = null;
+
+const getTransporter = () => {
+  if (transporter) return transporter;
+
+  transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       type: 'OAuth2',
@@ -13,6 +17,8 @@ const createTransporter = () => {
       refreshToken: process.env.GOOGLE_REFRESH_TOKEN
     }
   });
+
+  return transporter;
 };
 
 export const sendOtpEmail = async (to, otp) => {
@@ -22,7 +28,7 @@ export const sendOtpEmail = async (to, otp) => {
       return { success: false, error: 'Google OAuth credentials missing in Render environment variables' };
     }
 
-    const transporter = createTransporter();
+    const mailer = getTransporter();
 
     const mailOptions = {
       from: `"Vyre Accounts" <${process.env.GMAIL_USER}>`,
@@ -41,7 +47,7 @@ export const sendOtpEmail = async (to, otp) => {
       `,
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    const info = await mailer.sendMail(mailOptions);
     console.log('Message sent via Gmail OAuth2: %s', info.messageId);
     return { success: true };
   } catch (err) {

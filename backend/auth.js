@@ -12,9 +12,15 @@ export async function registerUser(email, username, password) {
   const hashed = await bcrypt.hash(password, 10);
   
   // Check if email or username already exists in main users table
-  const existing = await db.get('SELECT id FROM users WHERE email = ? OR username = ?', [email, username]);
+  const existing = await db.get('SELECT id FROM users WHERE email = $1 OR username = $2', [email, username]);
   if (existing) {
     return { success: false, error: 'Email or username already exists' };
+  }
+
+  // Check if username already exists in pending_users but for a different email
+  const existingPending = await db.get('SELECT email FROM pending_users WHERE username = $1 AND email != $2', [username, email]);
+  if (existingPending) {
+    return { success: false, error: 'Username is currently reserved by another pending registration' };
   }
 
   // Generate 6-digit OTP
