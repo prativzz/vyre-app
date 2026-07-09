@@ -22,10 +22,11 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
       })
         .then(res => res.json())
         .then(data => {
-          // Exclude deleted users
+          // Exclude deleted users and the internal system user
           const filtered = data.filter(u => 
             u.username !== 'Deleted User' && 
-            u.display_name !== 'Deleted User'
+            u.display_name !== 'Deleted User' &&
+            u.username !== 'system'
           );
           setAllUsers(filtered);
         })
