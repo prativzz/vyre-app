@@ -29,7 +29,7 @@ export default function BottomMenu({
   };
 
   return (
-    <div className="flex flex-col items-center space-y-3 pt-4 pb-2 flex-shrink-0">
+    <div className="flex flex-col items-center space-y-3 pt-4 pb-4 flex-shrink-0">
       {menuItems.map((item) => (
         <BottomMenuButton
           key={item.id}
