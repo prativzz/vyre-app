@@ -6,12 +6,14 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelPanel from '../components/ui/PixelPanel';
+import PixelLoader from '../components/ui/PixelLoader';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
@@ -25,14 +27,20 @@ export default function Login() {
       return;
     }
 
+    setIsLoading(true);
     const success = await login(email, password);
+    setIsLoading(false);
+    
     if (success) navigate('/');
     else setError('Invalid email or password');
   };
 
   const handleGoogleAuth = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      setIsLoading(true);
       const result = await googleLogin(tokenResponse.access_token);
+      setIsLoading(false);
+
       if (result.success) {
         if (result.needsOnboarding) {
           navigate('/complete-account', { state: { onboardingData: result } });
@@ -45,6 +53,7 @@ export default function Login() {
     },
     onError: () => {
       setError('Google Login Failed');
+      setIsLoading(false);
     }
   });
 
@@ -57,6 +66,7 @@ export default function Login() {
       className="min-h-screen flex items-center justify-center bg-vyre-bg p-4 relative overflow-hidden"
     >
       <PixelBackground />
+      {isLoading && <PixelLoader />}
 
       <PixelPanel className="p-8 w-full max-w-md animate-fade-in relative z-10 flex flex-col items-center">
         <div className="text-center mb-8">

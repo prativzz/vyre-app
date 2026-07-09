@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelPanel from '../components/ui/PixelPanel';
+import PixelLoader from '../components/ui/PixelLoader';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ export default function Register() {
   const [error, setError] = useState('');
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { register, verifyOtp, googleLogin } = useAuth();
   const navigate = useNavigate();
 
@@ -30,7 +32,10 @@ export default function Register() {
         return;
       }
 
+      setIsLoading(true);
       const result = await register(email, username, password);
+      setIsLoading(false);
+
       if (result.success && result.pending) {
         setStep(2);
       } else {
@@ -41,7 +46,11 @@ export default function Register() {
         setError('Please enter a 6-digit verification code');
         return;
       }
+
+      setIsLoading(true);
       const result = await verifyOtp(email, otp);
+      setIsLoading(false);
+
       if (result.success) {
         navigate('/');
       } else {
@@ -52,7 +61,10 @@ export default function Register() {
 
   const handleGoogleAuth = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      setIsLoading(true);
       const result = await googleLogin(tokenResponse.access_token);
+      setIsLoading(false);
+
       if (result.success) {
         if (result.needsOnboarding) {
           navigate('/complete-account', { state: { onboardingData: result } });
@@ -65,6 +77,7 @@ export default function Register() {
     },
     onError: () => {
       setError('Google Signup Failed');
+      setIsLoading(false);
     }
   });
 
@@ -77,6 +90,7 @@ export default function Register() {
       className="min-h-screen flex items-center justify-center bg-vyre-bg p-4 relative overflow-hidden"
     >
       <PixelBackground />
+      {isLoading && <PixelLoader />}
 
       <PixelPanel className="p-8 w-full max-w-md animate-fade-in relative z-10 flex flex-col items-center">
         <div className="text-center mb-8">
