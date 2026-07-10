@@ -226,8 +226,8 @@ function ParticipantWrapper({ trackRef, styleClass }) {
   }, [participant]);
 
   const isLocal = participant.isLocal;
-  const displayName = participant.name || 'Unknown';
-  const initial = displayName.charAt(0).toUpperCase();
+  const displayName = participant.name || '';
+  const initial = displayName ? displayName.charAt(0).toUpperCase() : '';
 
   const isScreenShare = trackRef.source === Track.Source.ScreenShare;
 
