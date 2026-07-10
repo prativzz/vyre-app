@@ -502,7 +502,7 @@ export default function Dashboard() {
                 transition={{ type: "spring", damping: 25, stiffness: 120 }}
                 className={`w-full h-full relative overflow-hidden ${
                   isMinimized 
-                    ? 'rounded-3xl bg-vyre-accent shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent cursor-move' 
+                    ? 'rounded-3xl bg-[#181B1F] shadow-[0_8px_30px_rgba(0,0,0,0.5)] cursor-move' 
                     : 'bg-vyre-bg'
                 }`}
               >
