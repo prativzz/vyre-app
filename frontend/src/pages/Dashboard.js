@@ -14,7 +14,7 @@ import { Menu, Users, X, UserCircle, Maximize2 } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
-import { motion, useMotionValue, MotionConfig } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -355,8 +355,7 @@ export default function Dashboard() {
   }
 
   return (
-    <MotionConfig transition={{ type: "spring", damping: 25, stiffness: 120 }}>
-      <div ref={dashboardRef} className="flex flex-col h-[100dvh] bg-vyre-bg overflow-hidden relative w-full max-w-[1920px] mx-auto">
+    <div ref={dashboardRef} className="flex flex-col h-[100dvh] bg-vyre-bg overflow-hidden relative w-full max-w-[1920px] mx-auto">
       <PixelBackground />
       
       {/* Mobile Header (visible only on small screens) */}
@@ -790,7 +789,6 @@ export default function Dashboard() {
         />
       )}
       </div>
-      </div>
-    </MotionConfig>
+    </div>
   );
 }

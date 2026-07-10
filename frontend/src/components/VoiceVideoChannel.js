@@ -364,8 +364,8 @@ function VideoGrid({ isMinimized }) {
   };
 
   return (
-    <motion.div layout className={`absolute inset-0 flex items-center justify-center ${isMinimized ? 'p-0' : 'p-2 lg:p-6 pb-28 lg:pb-32'}`}>
-      <motion.div layout className={`grid w-full h-full max-w-[1800px] mx-auto ${isMinimized ? 'gap-0' : 'gap-2 lg:gap-4'} ${getGridClasses(count, isMinimized)}`}>
+    <div className={`absolute inset-0 flex items-center justify-center ${isMinimized ? 'p-0' : 'p-2 lg:p-6 pb-28 lg:pb-32'}`}>
+      <div className={`grid w-full h-full max-w-[1800px] mx-auto ${isMinimized ? 'gap-0' : 'gap-2 lg:gap-4'} ${getGridClasses(count, isMinimized)}`}>
         <AnimatePresence mode="popLayout">
           {tracks.map((t, i) => (
             <ParticipantWrapper key={`${t.participant.isLocal ? 'local' : (t.participant.identity || t.participant.sid)}-${t.source}`} trackRef={t} styleClass={getItemClass(count, i, isMinimized)} />
@@ -376,8 +376,8 @@ function VideoGrid({ isMinimized }) {
             <span className="font-pixel text-[11px] tracking-widest uppercase">Waiting for others to join...</span>
           </div>
         )}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
