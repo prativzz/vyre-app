@@ -14,7 +14,7 @@ import { Menu, Users, X, UserCircle, Maximize2 } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
-import { motion, useMotionValue, animate } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -46,6 +46,7 @@ export default function Dashboard() {
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
   const isMinimized = activeVoiceChannel && (!selectedChannel || selectedChannel.id !== activeVoiceChannel.id);
+  const retryCountRef = useRef(0);
 
   useEffect(() => {
     if (!isMinimized) {
