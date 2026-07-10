@@ -46,12 +46,23 @@ export default function Dashboard() {
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
   const isMinimized = activeVoiceChannel && (!selectedChannel || selectedChannel.id !== activeVoiceChannel.id);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const prevIsMinimized = useRef(isMinimized);
   const retryCountRef = useRef(0);
 
   useEffect(() => {
     if (!isMinimized) {
       dragX.set(0);
       dragY.set(0);
+    }
+    
+    if (isMinimized !== prevIsMinimized.current) {
+      setIsTransitioning(true);
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 500); // 0.5s transition duration
+      prevIsMinimized.current = isMinimized;
+      return () => clearTimeout(timer);
     }
   }, [isMinimized, dragX, dragY]);
 
@@ -531,12 +542,14 @@ export default function Dashboard() {
               token={token}
               socket={socket}
               onLeave={() => {
+                socket?.emit('leave:voice', activeVoiceChannel.serverId);
                 setActiveVoiceChannel(null);
                 if (selectedChannel?.id === activeVoiceChannel.id) {
                   setSelectedChannel(null);
                 }
               }}
               isMinimized={isMinimized}
+              isTransitioning={isTransitioning}
             />
               </motion.div>
             </motion.div>

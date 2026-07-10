@@ -381,7 +381,7 @@ function VideoGrid({ isMinimized }) {
   );
 }
 
-export default function VoiceVideoChannel({ channel, serverId, token, onLeave, isMinimized }) {
+export default function VoiceVideoChannel({ channel, serverId, token, onLeave, isMinimized, isTransitioning }) {
   const [livekitToken, setLivekitToken] = useState('');
   const [error, setError] = useState(null);
 
@@ -460,8 +460,15 @@ export default function VoiceVideoChannel({ channel, serverId, token, onLeave, i
         >
           <LayoutContextProvider>
             <RoomAudioRenderer />
-            <VideoGrid isMinimized={isMinimized} />
-            {!isMinimized && <CustomDock onLeave={onLeave} />}
+            <motion.div
+               initial={{ opacity: 1 }}
+               animate={{ opacity: isTransitioning ? 0 : 1 }}
+               transition={{ duration: isTransitioning ? 0 : 0.3 }}
+               className="w-full h-full flex flex-col"
+            >
+              <VideoGrid isMinimized={isMinimized} />
+              {!isMinimized && <CustomDock onLeave={onLeave} />}
+            </motion.div>
           </LayoutContextProvider>
         </LiveKitRoom>
       </div>
