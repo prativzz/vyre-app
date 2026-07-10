@@ -49,12 +49,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!isMinimized) {
-      animate(dragX, 0, { type: "spring", bounce: 0.15, duration: 0.5 });
-      animate(dragY, 0, { type: "spring", bounce: 0.15, duration: 0.5 });
+      dragX.set(0);
+      dragY.set(0);
     }
   }, [isMinimized, dragX, dragY]);
 
-  const retryCountRef = useRef(0);
+
   const retryTimerRef = useRef(null);
 
   const currentServerIdRef = useRef(selectedServer?.id);
@@ -488,7 +488,7 @@ export default function Dashboard() {
               dragConstraints={dashboardRef}
               dragMomentum={false}
               dragElastic={0}
-              style={{ x: dragX, y: dragY }}
+              style={{ x: isMinimized ? dragX : 0, y: isMinimized ? dragY : 0 }}
               transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
               className={`pointer-events-auto ${
                 isMinimized 
@@ -496,8 +496,10 @@ export default function Dashboard() {
                   : 'absolute inset-0 w-full h-full'
               }`}
             >
-              <div
-                className={`w-full h-full relative overflow-hidden transition-all duration-500 ${
+              <motion.div
+                layout
+                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                className={`w-full h-full relative overflow-hidden ${
                   isMinimized 
                     ? 'rounded-3xl bg-vyre-accent shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent cursor-move' 
                     : 'bg-vyre-bg'
@@ -535,7 +537,7 @@ export default function Dashboard() {
               }}
               isMinimized={isMinimized}
             />
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         )}
