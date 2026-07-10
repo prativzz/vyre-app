@@ -385,7 +385,7 @@ function VideoGrid({ isMinimized }) {
       <div className={`grid w-full h-full max-w-[1800px] mx-auto ${isMinimized ? 'gap-0' : 'gap-2 lg:gap-4'} ${getGridClasses(count, isMinimized)}`}>
         <AnimatePresence mode="popLayout">
           {tracks.map((t, i) => (
-            <ParticipantWrapper key={`${t.participant.identity}-${t.source}`} trackRef={t} styleClass={getItemClass(count, i, isMinimized)} />
+            <ParticipantWrapper key={`${t.participant.isLocal ? 'local' : (t.participant.identity || t.participant.sid)}-${t.source}`} trackRef={t} styleClass={getItemClass(count, i, isMinimized)} />
           ))}
         </AnimatePresence>
         {participants.length === 0 && (
