@@ -499,7 +499,7 @@ export default function Dashboard() {
                 transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                 className={`w-full h-full relative overflow-hidden ${
                   isMinimized 
-                    ? 'rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent cursor-move' 
+                    ? 'rounded-xl bg-vyre-accent shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent cursor-move' 
                     : 'bg-vyre-bg'
                 }`}
               >
