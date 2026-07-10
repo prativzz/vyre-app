@@ -490,7 +490,7 @@ export default function Dashboard() {
               dragMomentum={false}
               dragElastic={0}
               style={{ x: isMinimized ? dragX : 0, y: isMinimized ? dragY : 0 }}
-              transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+              transition={{ type: "spring", damping: 25, stiffness: 120 }}
               className={`pointer-events-auto ${
                 isMinimized 
                   ? 'absolute bottom-4 right-4 w-64 h-40 z-50' 
@@ -499,7 +499,7 @@ export default function Dashboard() {
             >
               <motion.div
                 layout
-                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                transition={{ type: "spring", damping: 25, stiffness: 120 }}
                 className={`w-full h-full relative overflow-hidden ${
                   isMinimized 
                     ? 'rounded-3xl bg-vyre-accent shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent cursor-move' 
