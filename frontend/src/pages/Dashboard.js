@@ -14,7 +14,7 @@ import { Menu, Users, X, UserCircle, Maximize2 } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
-import { motion, useMotionValue, animate } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
