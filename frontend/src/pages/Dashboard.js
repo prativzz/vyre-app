@@ -14,7 +14,7 @@ import { Menu, Users, X, UserCircle, Maximize2 } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
-import { motion, useMotionValue } from 'framer-motion';
+import { motion, useMotionValue, animate } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -49,8 +49,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!isMinimized) {
-      dragX.set(0);
-      dragY.set(0);
+      animate(dragX, 0, { type: "spring", bounce: 0.15, duration: 0.5 });
+      animate(dragY, 0, { type: "spring", bounce: 0.15, duration: 0.5 });
     }
   }, [isMinimized, dragX, dragY]);
 
@@ -488,7 +488,7 @@ export default function Dashboard() {
               dragConstraints={dashboardRef}
               dragMomentum={false}
               dragElastic={0}
-              style={isMinimized ? { x: dragX, y: dragY } : { x: 0, y: 0 }}
+              style={{ x: dragX, y: dragY }}
               transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
               className={`pointer-events-auto ${
                 isMinimized 
