@@ -252,26 +252,9 @@ function ParticipantWrapper({ trackRef, styleClass }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 z-20 pointer-events-none rounded-3xl p-[2px]"
-            style={{
-              background: 'linear-gradient(90deg, rgba(32,201,151,0) 0%, rgba(32,201,151,0.5) 50%, rgba(32,201,151,0) 100%)',
-              backgroundSize: '200% 100%',
-              WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-              WebkitMaskComposite: 'xor',
-              maskComposite: 'exclude',
-            }}
-          >
-            <motion.div 
-              animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
-              className="w-full h-full rounded-3xl"
-              style={{
-                background: 'linear-gradient(90deg, rgba(32,201,151,0) 0%, rgba(32,201,151,0.8) 50%, rgba(32,201,151,0) 100%)',
-                backgroundSize: '200% 100%',
-              }}
-            />
-          </motion.div>
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 z-20 pointer-events-none rounded-3xl border-[3px] border-vyre-accent shadow-[0_0_20px_rgba(32,201,151,0.4),inset_0_0_10px_rgba(32,201,151,0.2)]"
+          />
         )}
       </AnimatePresence>
 
