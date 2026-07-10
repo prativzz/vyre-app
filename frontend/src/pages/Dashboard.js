@@ -14,7 +14,7 @@ import { Menu, Users, X, UserCircle, Maximize2 } from 'lucide-react';
 import PixelBackground from '../components/layout/PixelBackground';
 import PixelLoader from '../components/ui/PixelLoader';
 import PixelPanel from '../components/ui/PixelPanel';
-import { motion, useMotionValue } from 'framer-motion';
+import { motion, useMotionValue, animate } from 'framer-motion';
 
 export default function Dashboard() {
   const { token, user, logout } = useAuth();
@@ -47,24 +47,26 @@ export default function Dashboard() {
   const dragY = useMotionValue(0);
   const isMinimized = activeVoiceChannel && (!selectedChannel || selectedChannel.id !== activeVoiceChannel.id);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const prevIsMinimized = useRef(isMinimized);
+  const [prevMinState, setPrevMinState] = useState(isMinimized);
   const retryCountRef = useRef(0);
+
+  if (isMinimized !== prevMinState) {
+    setPrevMinState(isMinimized);
+    setIsTransitioning(true);
+  }
 
   useEffect(() => {
     if (!isMinimized) {
-      dragX.set(0);
-      dragY.set(0);
+      animate(dragX, 0, { type: "spring", damping: 25, stiffness: 120 });
+      animate(dragY, 0, { type: "spring", damping: 25, stiffness: 120 });
     }
     
-    if (isMinimized !== prevIsMinimized.current) {
-      setIsTransitioning(true);
-      const timer = setTimeout(() => {
-        setIsTransitioning(false);
-      }, 500); // 0.5s transition duration
-      prevIsMinimized.current = isMinimized;
+    // Safety fallback in case onLayoutAnimationComplete misses
+    if (isTransitioning) {
+      const timer = setTimeout(() => setIsTransitioning(false), 1200);
       return () => clearTimeout(timer);
     }
-  }, [isMinimized, dragX, dragY]);
+  }, [isMinimized, dragX, dragY, isTransitioning]);
 
 
   const retryTimerRef = useRef(null);
@@ -500,7 +502,7 @@ export default function Dashboard() {
               dragConstraints={dashboardRef}
               dragMomentum={false}
               dragElastic={0}
-              style={{ x: isMinimized ? dragX : 0, y: isMinimized ? dragY : 0 }}
+              style={{ x: dragX, y: dragY }}
               transition={{ type: "spring", damping: 25, stiffness: 120 }}
               className={`pointer-events-auto ${
                 isMinimized 
@@ -510,10 +512,16 @@ export default function Dashboard() {
             >
               <motion.div
                 layout
-                transition={{ type: "spring", damping: 25, stiffness: 120 }}
+                initial={false}
+                onLayoutAnimationComplete={() => setIsTransitioning(false)}
+                animate={{ opacity: (isTransitioning && !isMinimized) ? 0 : 1 }}
+                transition={{ 
+                  layout: { type: "spring", damping: 25, stiffness: 120 },
+                  opacity: { duration: (isTransitioning && !isMinimized) ? 0 : 0.3 }
+                }}
                 className={`w-full h-full relative overflow-hidden ${
                   isMinimized 
-                    ? 'rounded-3xl bg-vyre-accent shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent cursor-move' 
+                    ? 'rounded-3xl bg-[#111315] shadow-[0_12px_40px_rgba(0,0,0,0.6)] border border-white/10 cursor-move' 
                     : 'bg-vyre-bg'
                 }`}
               >
