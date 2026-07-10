@@ -57,8 +57,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!isMinimized) {
-      animate(dragX, 0, { type: "spring", damping: 25, stiffness: 120 });
-      animate(dragY, 0, { type: "spring", damping: 25, stiffness: 120 });
+      dragX.set(0);
+      dragY.set(0);
     }
     
     // Safety fallback in case onLayoutAnimationComplete misses
