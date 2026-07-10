@@ -462,14 +462,7 @@ export default function VoiceVideoChannel({ channel, serverId, token, onLeave, i
         </div>
       )}
 
-      {!isMinimized && (
-        <div className="absolute top-0 left-0 w-full p-6 z-10 pointer-events-none flex items-center gap-4">
-          <div className="px-4 py-2 bg-[#181B1F]/80 backdrop-blur-md rounded-xl border border-white/5 shadow-lg flex items-center gap-3">
-            <div className="w-2 h-2 bg-vyre-accent rounded-sm shadow-[0_0_8px_#20C997]" />
-            <span className="font-bold tracking-wide text-sm text-white/90">{channel.name}</span>
-          </div>
-        </div>
-      )}
+
 
       <div className="flex-1 w-full h-full relative z-10">
         <LiveKitRoom
