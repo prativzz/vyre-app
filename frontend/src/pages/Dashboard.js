@@ -483,21 +483,21 @@ export default function Dashboard() {
             isMinimized ? 'z-50 overflow-visible' : 'z-20 overflow-hidden'
           }`}>
             <motion.div 
+              layout
               drag={isMinimized}
               dragConstraints={dashboardRef}
               dragMomentum={false}
               dragElastic={0}
               style={isMinimized ? { x: dragX, y: dragY } : { x: 0, y: 0 }}
+              transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
               className={`pointer-events-auto ${
                 isMinimized 
                   ? 'absolute bottom-4 right-4 w-64 h-40 z-50' 
                   : 'absolute inset-0 w-full h-full'
               }`}
             >
-              <motion.div
-                layout
-                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
-                className={`w-full h-full relative overflow-hidden ${
+              <div
+                className={`w-full h-full relative overflow-hidden transition-all duration-500 ${
                   isMinimized 
                     ? 'rounded-3xl bg-vyre-accent shadow-[0_8px_30px_rgba(0,0,0,0.5)] border-2 border-vyre-accent cursor-move' 
                     : 'bg-vyre-bg'
@@ -535,7 +535,7 @@ export default function Dashboard() {
               }}
               isMinimized={isMinimized}
             />
-              </motion.div>
+              </div>
             </motion.div>
           </div>
         )}
