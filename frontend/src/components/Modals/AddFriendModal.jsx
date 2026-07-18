@@ -18,7 +18,12 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
     if (isOpen) {
       setLoading(true);
       fetch(`${API_URL}/users`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
       })
         .then(res => res.json())
         .then(data => {
@@ -46,8 +51,8 @@ export default function AddFriendModal({ isOpen, onClose, friends, pendingReques
   const results = allUsers.filter(u => {
     if (!searchQuery.trim()) return false;
     const query = searchQuery.toLowerCase();
-    return (u.username?.toLowerCase().includes(query) || 
-            u.display_name?.toLowerCase().includes(query));
+    return (u.username?.toLowerCase()?.includes(query) || 
+            u.display_name?.toLowerCase()?.includes(query));
   });
 
   // Check if user is already friend or pending

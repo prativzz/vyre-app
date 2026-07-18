@@ -24,8 +24,8 @@ export default function DirectMessages({ friend, token, socket, user }) {
     const handleNewMessage = (msg) => {
       // Only append if it belongs to this DM thread
       if (
-        (msg.sender_id === user.id && msg.receiver_id === friend.friend_id) ||
-        (msg.sender_id === friend.friend_id && msg.receiver_id === user.id)
+        (String(msg.sender_id) === String(user.id) && String(msg.receiver_id) === String(friend.friend_id)) ||
+        (String(msg.sender_id) === String(friend.friend_id) && String(msg.receiver_id) === String(user.id))
       ) {
         setMessages((prev) => [...prev, msg]);
       }
